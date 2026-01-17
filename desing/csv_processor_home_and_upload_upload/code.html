@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DataFlow - CSV Processor Dark Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007AFF",
+                        "primary-hover": "#0062CC",
+                        "vibrant-blue": "#3B82F6",
+                        "background-dark": "#121212",
+                        "surface-dark": "#1A1C1E",
+                        "surface-card": "#24272B",
+                        "text-off-white": "#F5F5F7",
+                        "text-light-gray": "#A1A1AA",
+                        "border-dark": "#2D2F36",
+                        "accent-glow": "rgba(0, 122, 255, 0.15)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2D2F36;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+        .upload-glow:hover {
+            box-shadow: 0 0 20px 2px rgba(0, 122, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-text-off-white antialiased overflow-hidden">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="w-64 flex-shrink-0 border-r border-border-dark bg-background-dark flex flex-col h-full transition-all duration-300">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="bg-vibrant-blue aspect-square rounded-lg size-10 flex items-center justify-center shadow-lg shadow-vibrant-blue/20">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">view_kanban</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-text-off-white text-lg font-bold leading-none tracking-tight">DataFlow</h1>
+<p class="text-text-light-gray text-xs font-medium mt-1">Processor v2.0</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1.5">
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vibrant-blue/10 text-vibrant-blue transition-colors" href="#">
+<span class="material-symbols-outlined filled" style="font-size: 22px;">cloud_upload</span>
+<span class="text-sm font-semibold">Upload</span>
+</a>
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">folder_open</span>
+<span class="text-sm font-medium">My Files</span>
+</a>
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">monitoring</span>
+<span class="text-sm font-medium">Visualizer</span>
+</a>
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</div>
+<div class="px-6 mt-auto mb-6">
+<button class="w-full flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-bold shadow-md shadow-vibrant-blue/20 transition-all active:scale-95">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+<span>New Project</span>
+</button>
+</div>
+<div class="p-4 border-t border-border-dark">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-border-dark" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDau-wxOXXfeHNTfZ64F3nIQSAB8dcHtOJ0ExzSgcORWeXLeuU4eltDOpSWzYFKOrDpv06CBzojL9nm44HCJHoVylrmAdL52_E2jnTfGlLhR9CBBtv34sqGobAy_UcsxWHEG3Cs3zS2f0nJEIYdvxuEUyBkLlaXvMfpMj4FzNsqHmSuJ1rY5AGlVHomQ97XnC9umxGHSKZeDle62EbUMQKGO2QjzsgTP1-VQUKGUaHR98hqTwIdjyVFqmI7O7a7ObFC-it7qjpqCHLY");'></div>
+<div class="flex flex-col min-w-0">
+<p class="text-text-off-white text-sm font-semibold truncate">Alex Morgan</p>
+<p class="text-text-light-gray text-xs truncate">alex@dataflow.io</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full bg-surface-dark overflow-hidden relative rounded-tl-2xl shadow-2xl border-l border-border-dark my-2 mr-2">
+<header class="flex-shrink-0 h-16 px-8 flex items-center justify-between border-b border-border-dark/50">
+<div class="flex items-center gap-2 text-text-light-gray">
+<span class="material-symbols-outlined" style="font-size: 20px;">home</span>
+<span class="text-sm">/</span>
+<span class="text-sm font-medium text-text-off-white">Upload</span>
+</div>
+<div class="w-full max-w-sm relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-gray group-focus-within:text-vibrant-blue transition-colors" style="font-size: 20px;">search</span>
+<input class="w-full bg-background-dark border border-border-dark/50 rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-vibrant-blue/20 focus:border-vibrant-blue text-text-off-white placeholder-text-light-gray transition-all" placeholder="Search files, projects..." type="text"/>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto px-8 py-8">
+<div class="max-w-[1000px] mx-auto flex flex-col gap-8">
+<div class="flex flex-col gap-2">
+<h1 class="text-text-off-white text-3xl font-black tracking-tight">Upload &amp; Process</h1>
+<p class="text-text-light-gray text-base max-w-2xl">Get started by importing your data. Our powerful engine will parse, validate, and prepare your CSV for visualization instantly.</p>
+</div>
+<div class="group/upload relative w-full">
+<label class="flex flex-col items-center justify-center w-full h-72 border-2 border-dashed border-border-dark rounded-xl bg-background-dark hover:border-vibrant-blue/50 upload-glow transition-all cursor-pointer" for="file-upload">
+<div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+<div class="bg-vibrant-blue/10 text-vibrant-blue p-4 rounded-full mb-4 group-hover/upload:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined filled" style="font-size: 32px;">cloud_upload</span>
+</div>
+<p class="mb-2 text-lg font-bold text-text-off-white">Drag &amp; drop your CSV here</p>
+<p class="mb-6 text-sm text-text-light-gray">or click to browse from your computer</p>
+<div class="flex items-center gap-2 bg-surface-dark border border-border-dark rounded-lg px-3 py-1.5 shadow-sm">
+<span class="text-xs font-mono text-text-light-gray">Supports: .csv, .xls, .json</span>
+<span class="w-1 h-1 bg-text-light-gray rounded-full"></span>
+<span class="text-xs font-mono text-text-light-gray">Max 50MB</span>
+</div>
+</div>
+<input class="hidden" id="file-upload" type="file"/>
+<div class="absolute bottom-6">
+<span class="bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-semibold py-2 px-6 rounded-lg shadow-md transition-colors pointer-events-none">
+                                Browse Files
+                            </span>
+</div>
+</label>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-bold text-text-off-white tracking-tight">Recent Files</h2>
+<button class="text-sm font-medium text-vibrant-blue hover:text-primary-hover flex items-center gap-1 transition-colors">
+                            View all
+                            <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="group relative flex flex-col p-4 bg-surface-card border border-border-dark rounded-xl hover:shadow-2xl hover:border-vibrant-blue/30 transition-all duration-300 cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="p-2 bg-green-500/10 text-green-400 rounded-lg">
+<span class="material-symbols-outlined" style="font-size: 24px;">table_view</span>
+</div>
+<button class="text-text-light-gray hover:text-text-off-white p-1 rounded-md hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<h3 class="text-base font-bold text-text-off-white mb-1 group-hover:text-vibrant-blue transition-colors">sales_data_q3.csv</h3>
+<div class="flex items-center gap-2 text-xs text-text-light-gray mb-4">
+<span>2.4MB</span>
+<span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
+<span>2 hours ago</span>
+</div>
+<div class="mt-auto pt-3 border-t border-border-dark/50 flex items-center justify-between">
+<span class="text-xs font-medium text-green-400 flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+                                    Processed
+                                </span>
+<span class="text-xs font-medium text-vibrant-blue opacity-0 group-hover:opacity-100 transition-opacity">Open File</span>
+</div>
+</div>
+<div class="group relative flex flex-col p-4 bg-surface-card border border-border-dark rounded-xl hover:shadow-2xl hover:border-vibrant-blue/30 transition-all duration-300 cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="p-2 bg-vibrant-blue/10 text-vibrant-blue rounded-lg">
+<span class="material-symbols-outlined" style="font-size: 24px;">inventory_2</span>
+</div>
+<button class="text-text-light-gray hover:text-text-off-white p-1 rounded-md hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<h3 class="text-base font-bold text-text-off-white mb-1 group-hover:text-vibrant-blue transition-colors">inventory_list.csv</h3>
+<div class="flex items-center gap-2 text-xs text-text-light-gray mb-4">
+<span>840KB</span>
+<span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
+<span>Yesterday</span>
+</div>
+<div class="mt-auto pt-3 border-t border-border-dark/50 flex items-center justify-between">
+<span class="text-xs font-medium text-green-400 flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+                                    Processed
+                                </span>
+<span class="text-xs font-medium text-vibrant-blue opacity-0 group-hover:opacity-100 transition-opacity">Open File</span>
+</div>
+</div>
+<div class="group relative flex flex-col p-4 bg-surface-card border border-border-dark rounded-xl hover:shadow-2xl hover:border-vibrant-blue/30 transition-all duration-300 cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
+<span class="material-symbols-outlined" style="font-size: 24px;">contacts</span>
+</div>
+<button class="text-text-light-gray hover:text-text-off-white p-1 rounded-md hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<h3 class="text-base font-bold text-text-off-white mb-1 group-hover:text-vibrant-blue transition-colors">client_contacts.csv</h3>
+<div class="flex items-center gap-2 text-xs text-text-light-gray mb-4">
+<span>1.2MB</span>
+<span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
+<span>Oct 24, 2023</span>
+</div>
+<div class="mt-auto pt-3 border-t border-border-dark/50 flex items-center justify-between">
+<span class="text-xs font-medium text-orange-400 flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">warning</span>
+                                    Mapping Needed
+                                </span>
+<span class="text-xs font-medium text-vibrant-blue opacity-0 group-hover:opacity-100 transition-opacity">Resolve</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="h-10"></div>
+</div>
+</main>
+</div>
+
+</body></html>
