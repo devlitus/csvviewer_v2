@@ -1,12 +1,12 @@
 ---
-import FileCard from './FileCard.astro';
+import FileCard from "./FileCard.astro";
 
 interface FileData {
   id: string;
   filename: string;
   size: string;
   date: string;
-  status: 'processed' | 'mapping_needed';
+  status: "processed" | "mapping_needed";
   icon: string;
   iconColor?: string;
 }
@@ -15,67 +15,135 @@ interface Props {
   files?: FileData[];
 }
 
-const {
-  files = [
-    {
-      id: '1',
-      filename: 'sales_data_q3.csv',
-      size: '2.4MB',
-      date: '2 hours ago',
-      status: 'processed',
-      icon: 'table_view',
-      iconColor: '#22C55E'
-    },
-    {
-      id: '2',
-      filename: 'inventory_list.csv',
-      size: '840KB',
-      date: 'Yesterday',
-      status: 'processed',
-      icon: 'inventory_2',
-      iconColor: '#007AFF'
-    },
-    {
-      id: '3',
-      filename: 'client_contacts.csv',
-      size: '1.2MB',
-      date: 'Oct 24, 2023',
-      status: 'mapping_needed',
-      icon: 'contacts',
-      iconColor: '#A855F7'
+const { files: propFiles } = Astro.props as Props;
+
+import fs from "node:fs";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+
+const FILES_DIR = path.join(process.cwd(), "files");
+
+// Helper for formatting file size
+function formatSize(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+// Helper for relative time (simplified)
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 172800) return "Yesterday";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+// Helper to truncate filename
+function truncateFilename(filename: string, maxLength: number = 12): string {
+  if (filename.length <= maxLength) return filename;
+  const ext = path.extname(filename);
+  const name = path.basename(filename, ext);
+  // Reserve space for extension and ellipsis if needed, but per requirement "max 12 chars",
+  // I'll strictly truncate the visual representation.
+  // Strategy: name(max 12) including '...'
+
+  if (filename.length <= 12) return filename;
+  return filename.substring(0, 9) + "...";
+}
+
+const icons = ["table_view", "description", "analytics", "dataset", "grid_on"];
+const iconColors = [
+  "#22C55E",
+  "#007AFF",
+  "#A855F7",
+  "#F59E0B",
+  "#EF4444",
+  "#EC4899",
+];
+
+let files: FileData[] = [];
+
+if (propFiles) {
+  files = propFiles;
+} else {
+  try {
+    if (!fs.existsSync(FILES_DIR)) {
+      fs.mkdirSync(FILES_DIR, { recursive: true });
     }
-  ]
-} = Astro.props as Props;
+
+    const dirFiles = fs.readdirSync(FILES_DIR);
+
+    const fileStats = dirFiles
+      .filter((file) => !file.startsWith("."))
+      .map((filename) => ({
+        filename,
+        stats: fs.statSync(path.join(FILES_DIR, filename)),
+      }))
+      .sort((a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime());
+
+    files = fileStats.map((item) => ({
+      id: randomUUID(),
+      filename: truncateFilename(item.filename),
+      size: formatSize(item.stats.size),
+      date: getRelativeTime(item.stats.mtime),
+      status: "processed",
+      icon: icons[Math.floor(Math.random() * icons.length)],
+      iconColor: iconColors[Math.floor(Math.random() * iconColors.length)],
+    }));
+  } catch (error) {
+    console.error("Error reading files:", error);
+    files = [];
+  }
+}
 ---
 
 <section class="flex flex-col gap-4">
   <!-- Header -->
   <div class="flex items-center justify-between">
-    <h2 class="text-xl font-bold text-text-off-white tracking-tight">Recent Files</h2>
-    <button class="text-sm font-medium text-vibrant-blue hover:text-primary-hover flex items-center gap-1 transition-colors">
+    <h2 class="text-xl font-bold text-text-off-white tracking-tight">
+      Recent Files
+    </h2>
+    <button
+      class="text-sm font-medium text-vibrant-blue hover:text-primary-hover flex items-center gap-1 transition-colors"
+    >
       View all
-      <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+      <span class="material-symbols-outlined" style="font-size: 16px;"
+        >arrow_forward</span
+      >
     </button>
   </div>
 
   <!-- Files Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    {files.map(file => (
-      <FileCard
-        filename={file.filename}
-        size={file.size}
-        date={file.date}
-        status={file.status}
-        icon={file.icon}
-        iconColor={file.iconColor}
-      />
-    ))}
+    {
+      files.map((file) => (
+        <FileCard
+          filename={file.filename}
+          size={file.size}
+          date={file.date}
+          status={file.status}
+          icon={file.icon}
+          iconColor={file.iconColor}
+        />
+      ))
+    }
   </div>
 </section>
 
 <style>
   :root {
-    --color-primary: #007AFF;
-    --color-primary-hover: #0062CC;
+    --color-primary: #007aff;
+    --color-primary-hover: #0062cc;
   }
 </style>

@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 # Claude Code temporary files
 tmpclaude-*
+
+files/*
