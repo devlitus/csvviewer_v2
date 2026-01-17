@@ -21,6 +21,15 @@ const bgClass = alternate ? "bg-surface-card/20" : "bg-background-dark";
 <tr class={`${bgClass} hover:bg-surface-card/40 transition-colors group`}>
   {
     columns.map((col) => {
+      if (col.key === "actions") {
+        return (
+          <td class="px-4 py-3.5 text-right">
+            <button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+              <Icon name="edit" size="sm" />
+            </button>
+          </td>
+        );
+      }
       const value = row[col.key];
       const isRight = col.align === "right";
       return (
@@ -45,11 +54,4 @@ const bgClass = alternate ? "bg-surface-card/20" : "bg-background-dark";
       );
     })
   }
-  <td class="px-4 py-3.5 text-right">
-    <button
-      class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all"
-    >
-      <Icon name="edit" size="sm" />
-    </button>
-  </td>
 </tr>
