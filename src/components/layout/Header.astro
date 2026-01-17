@@ -1,0 +1,23 @@
+---
+import SearchInput from '../ui/SearchInput.astro';
+import Breadcrumb from '../ui/Breadcrumb.astro';
+
+interface Props {
+  currentPage?: string;
+  breadcrumbItems?: Array<{ label: string; href?: string }>;
+}
+
+const {
+  currentPage = 'Upload',
+  breadcrumbItems = [{ label: 'Upload' }]
+} = Astro.props as Props;
+---
+
+<header class="h-16 bg-surface-dark border-b border-border-dark/50 px-8 flex items-center justify-between gap-6">
+  <div class="flex-1">
+    <Breadcrumb items={breadcrumbItems} />
+  </div>
+  <div class="w-full max-w-sm">
+    <SearchInput placeholder="Search files..." />
+  </div>
+</header>

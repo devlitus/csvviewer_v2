@@ -1,0 +1,50 @@
+---
+import Logo from '../navigation/Logo.astro';
+import NavMenu from '../navigation/NavMenu.astro';
+import Button from '../ui/Button.astro';
+import UserProfile from '../user/UserProfile.astro';
+
+interface Props {
+  currentPage?: string;
+}
+
+const { currentPage = 'upload' } = Astro.props as Props;
+---
+
+<aside class="w-64 bg-background-dark border-r border-border-dark flex flex-col h-full overflow-y-auto">
+  <!-- Logo -->
+  <div class="p-6 border-b border-border-dark">
+    <Logo />
+  </div>
+
+  <!-- Navigation Menu -->
+  <div class="flex-1 px-4 py-6">
+    <NavMenu currentPage={currentPage} />
+  </div>
+
+  <!-- New Project Button -->
+  <div class="px-4 py-4 border-t border-border-dark">
+    <Button variant="primary" fullWidth>
+      <span class="material-symbols-outlined inline-block mr-2 w-5 h-5" style="font-size: 20px;">
+        add_circle
+      </span>
+      New Project
+    </Button>
+  </div>
+
+  <!-- User Profile -->
+  <div class="px-2 py-4 border-t border-border-dark">
+    <UserProfile />
+  </div>
+</aside>
+
+<style>
+  aside::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  aside::-webkit-scrollbar-thumb {
+    background: var(--color-border-dark);
+    border-radius: 3px;
+  }
+</style>

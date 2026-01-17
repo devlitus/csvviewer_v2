@@ -1,0 +1,37 @@
+---
+interface Props {
+  href: string;
+  icon: string;
+  label: string;
+  isActive?: boolean;
+}
+
+const { href, icon, label, isActive = false } = Astro.props as Props;
+
+const navClass = isActive
+  ? "bg-vibrant-blue/10 text-vibrant-blue font-semibold" // Updated active state style
+  : "text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors"; // Updated hover state style
+---
+
+<a
+  href={href}
+  class={`group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${navClass}`}
+>
+  <span
+    class={`material-symbols-outlined ${isActive ? "filled" : ""}`}
+    style="font-size: 22px;"
+  >
+    {icon}
+  </span>
+  <span class="text-sm">{label}</span>
+</a>
+
+<style>
+  a {
+    transition: all 0.2s ease-in-out;
+  }
+
+  a:hover {
+    transform: translateX(4px);
+  }
+</style>
