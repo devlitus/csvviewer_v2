@@ -1,0 +1,25 @@
+---
+interface Props {
+  placeholder?: string;
+  class?: string;
+}
+
+const { placeholder = 'Search...', class: className = '' } = Astro.props as Props;
+---
+
+<div class="relative">
+  <input
+    type="text"
+    placeholder={placeholder}
+    class={`w-full bg-surface-card border border-border-dark rounded-lg px-4 py-2 pl-10 text-text-off-white placeholder-text-light-gray focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 ${className}`}
+  />
+  <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light-gray w-5 h-5" style="font-size: 20px;">
+    search
+  </span>
+</div>
+
+<style>
+  input::placeholder {
+    color: var(--color-text-light-gray);
+  }
+</style>

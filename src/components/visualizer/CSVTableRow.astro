@@ -1,0 +1,37 @@
+---
+import CategoryBadge from './CategoryBadge.astro';
+import Icon from '../ui/Icon.astro';
+
+interface CSVRow {
+  id: string;
+  date: string;
+  product: string;
+  category: 'Electronics' | 'Furniture' | 'Accessories';
+  quantity: number;
+  revenue: string;
+}
+
+interface Props {
+  row: CSVRow;
+  alternate?: boolean;
+}
+
+const { row, alternate = false } = Astro.props;
+const bgClass = alternate ? 'bg-surface-card/20' : 'bg-background-dark';
+---
+
+<tr class={`${bgClass} hover:bg-surface-card/40 transition-colors group`}>
+  <td class="px-6 py-3.5 font-mono text-text-light-gray">{row.id}</td>
+  <td class="px-6 py-3.5">{row.date}</td>
+  <td class="px-6 py-3.5 font-medium text-white">{row.product}</td>
+  <td class="px-6 py-3.5">
+    <CategoryBadge category={row.category} />
+  </td>
+  <td class="px-6 py-3.5 text-right">{row.quantity}</td>
+  <td class="px-6 py-3.5 text-right font-mono font-medium">{row.revenue}</td>
+  <td class="px-4 py-3.5 text-right">
+    <button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+      <Icon name="edit" size="sm" />
+    </button>
+  </td>
+</tr>

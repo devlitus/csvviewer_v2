@@ -1,0 +1,81 @@
+---
+import FileCard from './FileCard.astro';
+
+interface FileData {
+  id: string;
+  filename: string;
+  size: string;
+  date: string;
+  status: 'processed' | 'mapping_needed';
+  icon: string;
+  iconColor?: string;
+}
+
+interface Props {
+  files?: FileData[];
+}
+
+const {
+  files = [
+    {
+      id: '1',
+      filename: 'sales_data_q3.csv',
+      size: '2.4MB',
+      date: '2 hours ago',
+      status: 'processed',
+      icon: 'table_view',
+      iconColor: '#22C55E'
+    },
+    {
+      id: '2',
+      filename: 'inventory_list.csv',
+      size: '840KB',
+      date: 'Yesterday',
+      status: 'processed',
+      icon: 'inventory_2',
+      iconColor: '#007AFF'
+    },
+    {
+      id: '3',
+      filename: 'client_contacts.csv',
+      size: '1.2MB',
+      date: 'Oct 24, 2023',
+      status: 'mapping_needed',
+      icon: 'contacts',
+      iconColor: '#A855F7'
+    }
+  ]
+} = Astro.props as Props;
+---
+
+<section class="flex flex-col gap-4">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold text-text-off-white tracking-tight">Recent Files</h2>
+    <button class="text-sm font-medium text-vibrant-blue hover:text-primary-hover flex items-center gap-1 transition-colors">
+      View all
+      <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+    </button>
+  </div>
+
+  <!-- Files Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {files.map(file => (
+      <FileCard
+        filename={file.filename}
+        size={file.size}
+        date={file.date}
+        status={file.status}
+        icon={file.icon}
+        iconColor={file.iconColor}
+      />
+    ))}
+  </div>
+</section>
+
+<style>
+  :root {
+    --color-primary: #007AFF;
+    --color-primary-hover: #0062CC;
+  }
+</style>

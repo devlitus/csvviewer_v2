@@ -1,0 +1,80 @@
+---
+interface Props {
+  currentPage?: number;
+  totalPages?: number;
+  totalFiles?: number;
+  filesPerPage?: number;
+}
+
+const {
+  currentPage = 1,
+  totalPages = 7,
+  totalFiles = 42,
+  filesPerPage = 6
+} = Astro.props as Props;
+
+const startFile = (currentPage - 1) * filesPerPage + 1;
+const endFile = Math.min(currentPage * filesPerPage, totalFiles);
+---
+
+<div class="mt-auto border-t border-border-dark px-6 py-4 flex items-center justify-between bg-background-dark">
+  <!-- Contador -->
+  <span class="text-xs text-text-light-gray">
+    Showing <span class="text-text-off-white font-medium">{startFile}-{endFile}</span> of <span class="text-text-off-white font-medium">{totalFiles}</span> files
+  </span>
+
+  <!-- Botones de paginación -->
+  <div class="flex items-center gap-2">
+    <!-- Botón Previous -->
+    <button
+      class="p-1.5 rounded-lg border border-border-dark text-text-light-gray hover:bg-white/5 disabled:opacity-30 transition-colors"
+      disabled={currentPage === 1}
+    >
+      <span class="material-symbols-outlined" style="font-size: 20px;">chevron_left</span>
+    </button>
+
+    <!-- Página 1 -->
+    <button
+      class={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+        currentPage === 1
+          ? 'border-vibrant-blue bg-vibrant-blue/10 text-vibrant-blue font-bold'
+          : 'border-border-dark text-text-light-gray hover:bg-white/5'
+      }`}
+    >
+      1
+    </button>
+
+    <!-- Página 2 -->
+    <button
+      class={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+        currentPage === 2
+          ? 'border-vibrant-blue bg-vibrant-blue/10 text-vibrant-blue font-bold'
+          : 'border-border-dark text-text-light-gray hover:bg-white/5'
+      }`}
+    >
+      2
+    </button>
+
+    <!-- Página 3 -->
+    <button
+      class={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+        currentPage === 3
+          ? 'border-vibrant-blue bg-vibrant-blue/10 text-vibrant-blue font-bold'
+          : 'border-border-dark text-text-light-gray hover:bg-white/5'
+      }`}
+    >
+      3
+    </button>
+
+    <!-- Ellipsis -->
+    <span class="text-text-light-gray">...</span>
+
+    <!-- Botón Next -->
+    <button
+      class="p-1.5 rounded-lg border border-border-dark text-text-light-gray hover:bg-white/5 disabled:opacity-30 transition-colors"
+      disabled={currentPage === totalPages}
+    >
+      <span class="material-symbols-outlined" style="font-size: 20px;">chevron_right</span>
+    </button>
+  </div>
+</div>

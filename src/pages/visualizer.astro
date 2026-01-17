@@ -1,0 +1,86 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import Sidebar from '../components/layout/Sidebar.astro';
+import Header from '../components/layout/Header.astro';
+import MainContent from '../components/layout/MainContent.astro';
+import DataToolbar from '../components/visualizer/DataToolbar.astro';
+import CSVTable from '../components/visualizer/CSVTable.astro';
+import Icon from '../components/ui/Icon.astro';
+
+// Interface para datos CSV
+interface CSVRow {
+  id: string;
+  date: string;
+  product: string;
+  category: 'Electronics' | 'Furniture' | 'Accessories';
+  quantity: number;
+  revenue: string;
+}
+
+// Datos mock de ejemplo
+const mockData: CSVRow[] = [
+  { id: '#1024', date: 'Oct 24, 2023', product: 'Wireless Noise Cancelling Headphones', category: 'Electronics', quantity: 2, revenue: '$598.00' },
+  { id: '#1023', date: 'Oct 24, 2023', product: 'Ergonomic Mesh Office Chair', category: 'Furniture', quantity: 1, revenue: '$349.99' },
+  { id: '#1022', date: 'Oct 23, 2023', product: 'USB-C Multi-port Docking Station', category: 'Accessories', quantity: 5, revenue: '$649.75' },
+  { id: '#1021', date: 'Oct 23, 2023', product: '4K Ultra HD Monitor 27"', category: 'Electronics', quantity: 2, revenue: '$899.98' },
+  { id: '#1020', date: 'Oct 22, 2023', product: 'Mechanical Gaming Keyboard RGB', category: 'Electronics', quantity: 12, revenue: '$1,788.00' },
+  { id: '#1019', date: 'Oct 22, 2023', product: 'Adjustable Standing Desk', category: 'Furniture', quantity: 1, revenue: '$549.00' },
+  { id: '#1018', date: 'Oct 21, 2023', product: 'Laptop Carry Sleeve 15"', category: 'Accessories', quantity: 3, revenue: '$89.97' },
+  { id: '#1017', date: 'Oct 21, 2023', product: 'Wireless Mouse', category: 'Electronics', quantity: 8, revenue: '$399.92' },
+];
+
+// Configuración de breadcrumb
+const breadcrumb = [
+  { label: 'Visualizer', href: '/visualizer' },
+  { label: 'sales_data_q3.csv' }
+];
+---
+
+<AppLayout title="DataFlow - CSV Visualizer">
+  <Sidebar currentPage="visualizer" />
+  <div class="flex-1 flex flex-col h-full">
+    <Header breadcrumb={breadcrumb} />
+    <MainContent>
+      <!-- Toolbar con filtros y botones -->
+      <DataToolbar totalRecords={12403} displayedRecords={50} />
+
+      <!-- Contenedor de tabla con scroll -->
+      <div class="flex-1 overflow-hidden px-8 pb-8 flex flex-col">
+        <div class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden">
+          <!-- Tabla de datos CSV -->
+          <CSVTable data={mockData} />
+
+          <!-- Footer con paginación -->
+          <div class="border-t border-border-dark bg-surface-card p-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-text-light-gray">Rows per page:</span>
+              <select class="bg-background-dark border border-border-dark rounded text-xs text-text-off-white py-1 pl-2 pr-6 focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue">
+                <option>10</option>
+                <option>25</option>
+                <option selected>50</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50">
+                <Icon name="first_page" size="sm" />
+              </button>
+              <button class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50">
+                <Icon name="chevron_left" size="sm" />
+              </button>
+              <span class="text-xs text-text-light-gray mx-2">
+                Page <span class="text-text-off-white font-medium">1</span> of <span class="text-text-off-white font-medium">24</span>
+              </span>
+              <button class="p-1 rounded hover:bg-white/10 text-text-off-white">
+                <Icon name="chevron_right" size="sm" />
+              </button>
+              <button class="p-1 rounded hover:bg-white/10 text-text-off-white">
+                <Icon name="last_page" size="sm" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MainContent>
+  </div>
+</AppLayout>
