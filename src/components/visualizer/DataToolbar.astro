@@ -8,11 +8,19 @@ interface Column {
 
 interface Props {
   totalRecords: number;
-  displayedRecords: number;
+  startRecord?: number;
+  endRecord?: number;
+  displayedRecords?: number; // Deprecated but kept for backward compat if needed, though we prefer range
   columns?: Column[];
 }
 
-const { totalRecords, displayedRecords, columns = [] } = Astro.props;
+const {
+  totalRecords,
+  startRecord = 1,
+  endRecord = totalRecords,
+  displayedRecords, // unused if we use start/end
+  columns = [],
+} = Astro.props;
 ---
 
 <div class="flex-shrink-0 px-8 py-6">
@@ -25,8 +33,10 @@ const { totalRecords, displayedRecords, columns = [] } = Astro.props;
         Data Preview
       </h2>
       <p class="text-xs text-text-light-gray">
-        Showing {displayedRecords} rows from {totalRecords.toLocaleString()} total
-        records
+        Showing {startRecord}-{endRecord} rows from {
+          totalRecords.toLocaleString()
+        }
+        total records
       </p>
     </div>
 
