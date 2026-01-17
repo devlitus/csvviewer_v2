@@ -107,13 +107,44 @@ const {
       </div>
 
       <!-- Botón Export -->
-      <button
-        class="flex items-center gap-2 px-3 py-1.5 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-vibrant-blue/20"
-      >
-        <Icon name="download" size="sm" />
-        Export
-        <Icon name="expand_more" size="sm" />
-      </button>
+      <div class="relative" id="export-container">
+        <button
+          id="export-toggle-btn"
+          class="flex items-center gap-2 px-3 py-1.5 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-vibrant-blue/20"
+        >
+          <Icon name="download" size="sm" />
+          Export
+          <Icon name="expand_more" size="sm" />
+        </button>
+
+        <!-- Export Dropdown -->
+        <div
+          id="export-menu"
+          class="hidden absolute right-0 top-full mt-2 w-48 bg-surface-card border border-border-dark rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col"
+        >
+          <button
+            id="export-csv"
+            class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left transition-colors group border-b border-border-dark"
+          >
+            <Icon name="description" size="sm" class="text-vibrant-blue" />
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-text-off-white">CSV</span>
+              <span class="text-xs text-text-light-gray">Comma separated</span>
+            </div>
+          </button>
+          <button
+            id="export-xlsx"
+            class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left transition-colors group"
+          >
+            <Icon name="table_view" size="sm" class="text-emerald-500" />
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-text-off-white">Excel</span>
+              <span class="text-xs text-text-light-gray">.xlsx Spreadsheet</span
+              >
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -133,12 +164,16 @@ const {
     filterBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       filterMenu.classList.toggle("hidden");
+      exportMenu?.classList.add("hidden"); // Close export menu if open
     });
 
     // Close when clicking outside
     document.addEventListener("click", (e) => {
       if (!dropdownContainer.contains(e.target as Node)) {
         filterMenu.classList.add("hidden");
+      }
+      if (exportContainer && !exportContainer.contains(e.target as Node)) {
+        exportMenu?.classList.add("hidden");
       }
     });
 
@@ -172,4 +207,49 @@ const {
       filterMenu.classList.add("hidden");
     });
   }
+
+  // Export functionality
+  const exportBtn = document.getElementById("export-toggle-btn");
+  const exportMenu = document.getElementById("export-menu");
+  const exportContainer = document.getElementById("export-container");
+
+  if (exportBtn && exportMenu) {
+    exportBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      exportMenu.classList.toggle("hidden");
+      if (filterMenu) filterMenu.classList.add("hidden"); // Close filter menu
+    });
+  }
+
+  const handleExport = (format: string) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filename = urlParams.get("file");
+
+    if (!filename) return;
+
+    // Get hidden columns (re-using existing checkboxes)
+    const hiddenColumns: string[] = [];
+    checkboxes.forEach((checkbox) => {
+      if ((checkbox as HTMLInputElement).checked) {
+        hiddenColumns.push((checkbox as HTMLInputElement).value);
+      }
+    });
+
+    const exportUrl = new URL("/api/export", window.location.origin);
+    exportUrl.searchParams.set("file", filename);
+    exportUrl.searchParams.set("format", format);
+    if (hiddenColumns.length > 0) {
+      exportUrl.searchParams.set("exclude", hiddenColumns.join(","));
+    }
+
+    window.location.href = exportUrl.toString();
+    exportMenu?.classList.add("hidden");
+  };
+
+  document
+    .getElementById("export-csv")
+    ?.addEventListener("click", () => handleExport("csv"));
+  document
+    .getElementById("export-xlsx")
+    ?.addEventListener("click", () => handleExport("xlsx"));
 </script>
