@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DataFlow - CSV Visualizer Dark Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007AFF",
+                        "primary-hover": "#0062CC",
+                        "vibrant-blue": "#3B82F6",
+                        "background-dark": "#121212",
+                        "surface-dark": "#1A1C1E",
+                        "surface-card": "#24272B",
+                        "text-off-white": "#F5F5F7",
+                        "text-light-gray": "#A1A1AA",
+                        "border-dark": "#2D2F36",
+                        "accent-glow": "rgba(0, 122, 255, 0.15)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2D2F36;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-text-off-white antialiased overflow-hidden">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="w-64 flex-shrink-0 border-r border-border-dark bg-background-dark flex flex-col h-full transition-all duration-300">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="bg-vibrant-blue aspect-square rounded-lg size-10 flex items-center justify-center shadow-lg shadow-vibrant-blue/20">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">view_kanban</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-text-off-white text-lg font-bold leading-none tracking-tight">DataFlow</h1>
+<p class="text-text-light-gray text-xs font-medium mt-1">Processor v2.0</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1.5">
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">cloud_upload</span>
+<span class="text-sm font-medium">Upload</span>
+</a>
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">folder_open</span>
+<span class="text-sm font-medium">My Files</span>
+</a>
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg bg-vibrant-blue/10 text-vibrant-blue transition-colors" href="#">
+<span class="material-symbols-outlined filled" style="font-size: 22px;">monitoring</span>
+<span class="text-sm font-semibold">Visualizer</span>
+</a>
+<a class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</div>
+<div class="px-6 mt-auto mb-6">
+<button class="w-full flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-bold shadow-md shadow-vibrant-blue/20 transition-all active:scale-95">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+<span>New Project</span>
+</button>
+</div>
+<div class="p-4 border-t border-border-dark">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-border-dark" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDau-wxOXXfeHNTfZ64F3nIQSAB8dcHtOJ0ExzSgcORWeXLeuU4eltDOpSWzYFKOrDpv06CBzojL9nm44HCJHoVylrmAdL52_E2jnTfGlLhR9CBBtv34sqGobAy_UcsxWHEG3Cs3zS2f0nJEIYdvxuEUyBkLlaXvMfpMj4FzNsqHmSuJ1rY5AGlVHomQ97XnC9umxGHSKZeDle62EbUMQKGO2QjzsgTP1-VQUKGUaHR98hqTwIdjyVFqmI7O7a7ObFC-it7qjpqCHLY");'></div>
+<div class="flex flex-col min-w-0">
+<p class="text-text-off-white text-sm font-semibold truncate">Alex Morgan</p>
+<p class="text-text-light-gray text-xs truncate">alex@dataflow.io</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full bg-surface-dark overflow-hidden relative rounded-tl-2xl shadow-2xl border-l border-border-dark my-2 mr-2">
+<header class="flex-shrink-0 h-16 px-8 flex items-center justify-between border-b border-border-dark/50">
+<div class="flex items-center gap-2 text-text-light-gray">
+<span class="material-symbols-outlined" style="font-size: 20px;">home</span>
+<span class="text-sm">/</span>
+<span class="text-sm text-text-light-gray hover:text-text-off-white transition-colors cursor-pointer">Visualizer</span>
+<span class="text-sm">/</span>
+<span class="text-sm font-medium text-text-off-white">sales_data_q3.csv</span>
+</div>
+<div class="w-full max-w-sm relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-gray group-focus-within:text-vibrant-blue transition-colors" style="font-size: 20px;">search</span>
+<input class="w-full bg-background-dark border border-border-dark/50 rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-vibrant-blue/20 focus:border-vibrant-blue text-text-off-white placeholder-text-light-gray transition-all" placeholder="Search application..." type="text"/>
+</div>
+</header>
+<div class="flex-shrink-0 px-8 py-6">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div class="flex flex-col gap-1">
+<h2 class="text-xl font-bold text-text-off-white tracking-tight">Data Preview</h2>
+<p class="text-xs text-text-light-gray">Showing 50 rows from 12,403 total records</p>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<div class="relative flex-1 sm:flex-initial group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-gray group-focus-within:text-vibrant-blue" style="font-size: 18px;">filter_alt</span>
+<input class="bg-background-dark border border-border-dark rounded-lg py-1.5 pl-9 pr-3 text-sm text-text-off-white focus:border-vibrant-blue focus:ring-1 focus:ring-vibrant-blue placeholder-text-light-gray w-full sm:w-64 transition-colors" placeholder="Filter columns..." type="text"/>
+</div>
+<div class="relative">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-surface-card border border-border-dark rounded-lg text-text-light-gray hover:text-text-off-white hover:border-text-light-gray/50 text-sm font-medium transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">tune</span>
+                                Filter
+                            </button>
+</div>
+<div class="relative">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-vibrant-blue/20">
+<span class="material-symbols-outlined" style="font-size: 18px;">download</span>
+                                Export
+                                <span class="material-symbols-outlined" style="font-size: 18px;">expand_more</span>
+</button>
+<div class="absolute right-0 mt-2 w-48 bg-surface-card border border-border-dark rounded-lg shadow-xl z-50 overflow-hidden hidden group-hover:block">
+<div class="py-1">
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-text-off-white hover:bg-white/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-text-light-gray" style="font-size: 18px;">csv</span>
+                                        Export as CSV
+                                    </a>
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-text-off-white hover:bg-white/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-text-light-gray" style="font-size: 18px;">table_view</span>
+                                        Export as Excel
+                                    </a>
+<a class="flex items-center gap-2 px-4 py-2 text-sm text-text-off-white hover:bg-white/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-text-light-gray" style="font-size: 18px;">code</span>
+                                        Export as JSON
+                                    </a>
+</div>
+</div>
+<div class="absolute right-0 top-full mt-2 w-56 bg-surface-card border border-border-dark rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col">
+<div class="px-3 py-2 border-b border-border-dark bg-surface-card/50">
+<span class="text-xs font-semibold text-text-light-gray uppercase tracking-wider">Select Columns</span>
+</div>
+<div class="max-h-64 overflow-y-auto p-1">
+<label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<span class="text-sm text-text-off-white group-hover:text-white">ID</span>
+</label>
+<label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<span class="text-sm text-text-off-white group-hover:text-white">Date</span>
+</label>
+<label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<span class="text-sm text-text-off-white group-hover:text-white">Product</span>
+</label>
+<label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<span class="text-sm text-text-off-white group-hover:text-white">Category</span>
+</label>
+<label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<span class="text-sm text-text-off-white group-hover:text-white">Quantity</span>
+</label>
+<label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<span class="text-sm text-text-off-white group-hover:text-white">Total Revenue</span>
+</label>
+</div>
+<div class="p-2 border-t border-border-dark bg-surface-card/50 flex justify-end">
+<button class="text-xs font-semibold text-vibrant-blue hover:text-primary-hover px-2 py-1 rounded">Apply</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-hidden px-8 pb-8 flex flex-col">
+<div class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden">
+<div class="overflow-auto flex-1 w-full">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-surface-card sticky top-0 z-10 shadow-sm">
+<tr>
+<th class="px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark w-16">
+<div class="flex items-center gap-1 cursor-pointer hover:text-text-off-white">
+                                            ID
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">unfold_more</span>
+</div>
+</th>
+<th class="px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark">
+<div class="flex items-center gap-1 cursor-pointer hover:text-text-off-white">
+                                            Date
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">unfold_more</span>
+</div>
+</th>
+<th class="px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark">
+<div class="flex items-center gap-1 cursor-pointer hover:text-text-off-white">
+                                            Product
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">unfold_more</span>
+</div>
+</th>
+<th class="px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark">
+<div class="flex items-center gap-1 cursor-pointer hover:text-text-off-white">
+                                            Category
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">filter_list</span>
+</div>
+</th>
+<th class="px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark text-right">
+<div class="flex items-center justify-end gap-1 cursor-pointer hover:text-text-off-white">
+                                            Quantity
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">unfold_more</span>
+</div>
+</th>
+<th class="px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark text-right">
+<div class="flex items-center justify-end gap-1 cursor-pointer hover:text-text-off-white">
+                                            Total Revenue
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">arrow_downward</span>
+</div>
+</th>
+<th class="px-4 py-4 border-b border-border-dark w-10"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-dark/50 text-text-off-white">
+<tr class="bg-background-dark hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1024</td>
+<td class="px-6 py-3.5">Oct 24, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">Wireless Noise Cancelling Headphones</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">Electronics</span></td>
+<td class="px-6 py-3.5 text-right">2</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$598.00</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-surface-card/20 hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1023</td>
+<td class="px-6 py-3.5">Oct 24, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">Ergonomic Mesh Office Chair</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">Furniture</span></td>
+<td class="px-6 py-3.5 text-right">1</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$349.99</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-background-dark hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1022</td>
+<td class="px-6 py-3.5">Oct 23, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">USB-C Multi-port Docking Station</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">Accessories</span></td>
+<td class="px-6 py-3.5 text-right">5</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$649.75</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-surface-card/20 hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1021</td>
+<td class="px-6 py-3.5">Oct 23, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">4K Ultra HD Monitor 27"</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">Electronics</span></td>
+<td class="px-6 py-3.5 text-right">2</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$899.98</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-background-dark hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1020</td>
+<td class="px-6 py-3.5">Oct 22, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">Mechanical Gaming Keyboard RGB</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">Electronics</span></td>
+<td class="px-6 py-3.5 text-right">12</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$1,788.00</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-surface-card/20 hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1019</td>
+<td class="px-6 py-3.5">Oct 22, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">Adjustable Standing Desk</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">Furniture</span></td>
+<td class="px-6 py-3.5 text-right">1</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$549.00</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-background-dark hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1018</td>
+<td class="px-6 py-3.5">Oct 21, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">Laptop Carry Sleeve 15"</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">Accessories</span></td>
+<td class="px-6 py-3.5 text-right">3</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$89.97</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+<tr class="bg-surface-card/20 hover:bg-surface-card/40 transition-colors group">
+<td class="px-6 py-3.5 font-mono text-text-light-gray">#1017</td>
+<td class="px-6 py-3.5">Oct 21, 2023</td>
+<td class="px-6 py-3.5 font-medium text-white">Wireless Mouse</td>
+<td class="px-6 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">Electronics</span></td>
+<td class="px-6 py-3.5 text-right">8</td>
+<td class="px-6 py-3.5 text-right font-mono font-medium">$399.92</td>
+<td class="px-4 py-3.5 text-right">
+<button class="text-text-light-gray hover:text-vibrant-blue opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="border-t border-border-dark bg-surface-card p-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-xs text-text-light-gray">Rows per page:</span>
+<select class="bg-background-dark border border-border-dark rounded text-xs text-text-off-white py-1 pl-2 pr-6 focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue">
+<option>10</option>
+<option>25</option>
+<option>50</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50">
+<span class="material-symbols-outlined" style="font-size: 18px;">first_page</span>
+</button>
+<button class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50">
+<span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+</button>
+<span class="text-xs text-text-light-gray mx-2">Page <span class="text-text-off-white font-medium">1</span> of <span class="text-text-off-white font-medium">24</span></span>
+<button class="p-1 rounded hover:bg-white/10 text-text-off-white">
+<span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+</button>
+<button class="p-1 rounded hover:bg-white/10 text-text-off-white">
+<span class="material-symbols-outlined" style="font-size: 18px;">last_page</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

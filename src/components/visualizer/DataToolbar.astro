@@ -1,21 +1,32 @@
 ---
-import Icon from '../ui/Icon.astro';
+import Icon from "../ui/Icon.astro";
+
+interface Column {
+  key: string;
+  label: string;
+}
 
 interface Props {
   totalRecords: number;
   displayedRecords: number;
+  columns?: Column[];
 }
 
-const { totalRecords, displayedRecords } = Astro.props;
+const { totalRecords, displayedRecords, columns = [] } = Astro.props;
 ---
 
 <div class="flex-shrink-0 px-8 py-6">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+  >
     <!-- Título y contador -->
     <div class="flex flex-col gap-1">
-      <h2 class="text-xl font-bold text-text-off-white tracking-tight">Data Preview</h2>
+      <h2 class="text-xl font-bold text-text-off-white tracking-tight">
+        Data Preview
+      </h2>
       <p class="text-xs text-text-light-gray">
-        Showing {displayedRecords} rows from {totalRecords.toLocaleString()} total records
+        Showing {displayedRecords} rows from {totalRecords.toLocaleString()} total
+        records
       </p>
     </div>
 
@@ -23,7 +34,10 @@ const { totalRecords, displayedRecords } = Astro.props;
     <div class="flex items-center gap-3 w-full sm:w-auto">
       <!-- Input de filtro -->
       <div class="relative flex-1 sm:flex-initial group">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-gray group-focus-within:text-vibrant-blue" style="font-size: 18px;">
+        <span
+          class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-gray group-focus-within:text-vibrant-blue"
+          style="font-size: 18px;"
+        >
           filter_alt
         </span>
         <input
@@ -33,14 +47,59 @@ const { totalRecords, displayedRecords } = Astro.props;
         />
       </div>
 
-      <!-- Botón Filter -->
-      <button class="flex items-center gap-2 px-3 py-1.5 bg-surface-card border border-border-dark rounded-lg text-text-light-gray hover:text-text-off-white hover:border-text-light-gray/50 text-sm font-medium transition-colors">
-        <Icon name="tune" size="sm" />
-        Filter
-      </button>
+      <!-- Filter Dropdown -->
+      <div class="relative" id="filter-dropdown-container">
+        <button
+          id="filter-toggle-btn"
+          class="flex items-center gap-2 px-3 py-1.5 bg-surface-card border border-border-dark rounded-lg text-text-light-gray hover:text-text-off-white hover:border-text-light-gray/50 text-sm font-medium transition-colors"
+        >
+          <Icon name="tune" size="sm" />
+          Filter
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div
+          id="filter-menu"
+          class="hidden absolute right-0 top-full mt-2 w-56 bg-surface-card border border-border-dark rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col"
+        >
+          <div class="px-3 py-2 border-b border-border-dark bg-surface-card/50">
+            <span
+              class="text-xs font-semibold text-text-light-gray uppercase tracking-wider"
+              >Select Columns</span
+            >
+          </div>
+          <div class="max-h-64 overflow-y-auto p-1">
+            {
+              columns.map((col) => (
+                <label class="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    value={col.key}
+                    class="column-checkbox rounded border-border-dark bg-background-dark text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4"
+                  />
+                  <span class="text-sm text-text-off-white group-hover:text-white">
+                    {col.label}
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+          <div
+            class="p-2 border-t border-border-dark bg-surface-card/50 flex justify-end"
+          >
+            <button
+              id="apply-filters-btn"
+              class="text-xs font-semibold text-vibrant-blue hover:text-primary-hover px-2 py-1 rounded"
+              >Apply</button
+            >
+          </div>
+        </div>
+      </div>
 
       <!-- Botón Export -->
-      <button class="flex items-center gap-2 px-3 py-1.5 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-vibrant-blue/20">
+      <button
+        class="flex items-center gap-2 px-3 py-1.5 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-vibrant-blue/20"
+      >
         <Icon name="download" size="sm" />
         Export
         <Icon name="expand_more" size="sm" />
@@ -48,3 +107,59 @@ const { totalRecords, displayedRecords } = Astro.props;
     </div>
   </div>
 </div>
+
+<script>
+  // Client-side logic for filter dropdown
+  const filterBtn = document.getElementById("filter-toggle-btn");
+  const filterMenu = document.getElementById("filter-menu");
+  const applyBtn = document.getElementById("apply-filters-btn");
+  const checkboxes = document.querySelectorAll(".column-checkbox");
+  const dropdownContainer = document.getElementById(
+    "filter-dropdown-container",
+  );
+
+  if (filterBtn && filterMenu && applyBtn && dropdownContainer) {
+    // Toggle dropdown
+    filterBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      filterMenu.classList.toggle("hidden");
+    });
+
+    // Close when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdownContainer.contains(e.target as Node)) {
+        filterMenu.classList.add("hidden");
+      }
+    });
+
+    // Stop propagation inside menu
+    filterMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    // Apply filters
+    applyBtn.addEventListener("click", () => {
+      const hiddenColumns = new Set();
+      checkboxes.forEach((checkbox) => {
+        if ((checkbox as HTMLInputElement).checked) {
+          hiddenColumns.add((checkbox as HTMLInputElement).value);
+        }
+      });
+
+      // Update table visibility
+      // Targets both headers (th) and cells (td) with data-col attribute
+      const tableCells = document.querySelectorAll("[data-col]");
+      tableCells.forEach((cell) => {
+        const colKey = cell.getAttribute("data-col");
+        if (colKey && hiddenColumns.has(colKey)) {
+          cell.classList.add("hidden");
+        } else {
+          cell.classList.remove("hidden");
+        }
+      });
+
+      // Close menu
+      filterMenu.classList.add("hidden");
+    });
+  }
+</script>

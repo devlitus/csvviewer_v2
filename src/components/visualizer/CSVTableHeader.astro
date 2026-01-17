@@ -1,12 +1,12 @@
 ---
-import Icon from '../ui/Icon.astro';
+import Icon from "../ui/Icon.astro";
 
 interface Column {
   key: string;
   label: string;
   sortable?: boolean;
-  align?: 'left' | 'right';
-  icon?: 'unfold_more' | 'arrow_downward' | 'filter_list';
+  align?: "left" | "right";
+  icon?: "unfold_more" | "arrow_downward" | "filter_list";
   width?: string;
 }
 
@@ -19,17 +19,22 @@ const { columns } = Astro.props;
 
 <thead class="bg-surface-card sticky top-0 z-10 shadow-sm">
   <tr>
-    {columns.map((column) => (
-      <th
-        class={`px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark ${column.width || ''} ${column.align === 'right' ? 'text-right' : ''}`}
-      >
-        <div class={`flex items-center gap-1 cursor-pointer hover:text-text-off-white ${column.align === 'right' ? 'justify-end' : ''}`}>
-          {column.label}
-          {column.icon && (
-            <Icon name={column.icon} size="sm" class="text-current" />
-          )}
-        </div>
-      </th>
-    ))}
+    {
+      columns.map((column) => (
+        <th
+          data-col={column.key}
+          class={`px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark ${column.width || ""} ${column.align === "right" ? "text-right" : ""}`}
+        >
+          <div
+            class={`flex items-center gap-1 cursor-pointer hover:text-text-off-white ${column.align === "right" ? "justify-end" : ""}`}
+          >
+            {column.label}
+            {column.icon && (
+              <Icon name={column.icon} size="sm" class="text-current" />
+            )}
+          </div>
+        </th>
+      ))
+    }
   </tr>
 </thead>

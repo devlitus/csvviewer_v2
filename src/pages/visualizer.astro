@@ -74,7 +74,11 @@ const breadcrumb = [
     <Header breadcrumbItems={breadcrumb} />
     <MainContent>
       <!-- Toolbar con filtros y botones -->
-      <DataToolbar totalRecords={12403} displayedRecords={50} />
+      <DataToolbar
+        totalRecords={12403}
+        displayedRecords={50}
+        columns={columns}
+      />
 
       <!-- Contenedor de tabla con scroll -->
       <div class="flex-1 overflow-hidden px-8 pb-8 flex flex-col">
