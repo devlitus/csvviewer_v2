@@ -1,60 +1,117 @@
 ---
-import AppLayout from '../layouts/AppLayout.astro';
-import Sidebar from '../components/layout/Sidebar.astro';
-import Header from '../components/layout/Header.astro';
-import MainContent from '../components/layout/MainContent.astro';
-import DataToolbar from '../components/visualizer/DataToolbar.astro';
-import CSVTable from '../components/visualizer/CSVTable.astro';
-import Icon from '../components/ui/Icon.astro';
+import AppLayout from "../layouts/AppLayout.astro";
+import Sidebar from "../components/layout/Sidebar.astro";
+import Header from "../components/layout/Header.astro";
+import MainContent from "../components/layout/MainContent.astro";
+import DataToolbar from "../components/visualizer/DataToolbar.astro";
+import CSVTable from "../components/visualizer/CSVTable.astro";
+import Icon from "../components/ui/Icon.astro";
 
-// Interface para datos CSV
-interface CSVRow {
-  id: string;
-  date: string;
-  product: string;
-  category: 'Electronics' | 'Furniture' | 'Accessories';
-  quantity: number;
-  revenue: string;
+import path from "node:path";
+import { parseCSV } from "../utils/csvParser";
+
+// Definición de Column interface para el componente padre
+interface TableColumn {
+  key: string;
+  label: string;
+  width?: string;
+  align?: "left" | "right";
 }
 
-// Datos mock de ejemplo
-const mockData: CSVRow[] = [
-  { id: '#1024', date: 'Oct 24, 2023', product: 'Wireless Noise Cancelling Headphones', category: 'Electronics', quantity: 2, revenue: '$598.00' },
-  { id: '#1023', date: 'Oct 24, 2023', product: 'Ergonomic Mesh Office Chair', category: 'Furniture', quantity: 1, revenue: '$349.99' },
-  { id: '#1022', date: 'Oct 23, 2023', product: 'USB-C Multi-port Docking Station', category: 'Accessories', quantity: 5, revenue: '$649.75' },
-  { id: '#1021', date: 'Oct 23, 2023', product: '4K Ultra HD Monitor 27"', category: 'Electronics', quantity: 2, revenue: '$899.98' },
-  { id: '#1020', date: 'Oct 22, 2023', product: 'Mechanical Gaming Keyboard RGB', category: 'Electronics', quantity: 12, revenue: '$1,788.00' },
-  { id: '#1019', date: 'Oct 22, 2023', product: 'Adjustable Standing Desk', category: 'Furniture', quantity: 1, revenue: '$549.00' },
-  { id: '#1018', date: 'Oct 21, 2023', product: 'Laptop Carry Sleeve 15"', category: 'Accessories', quantity: 3, revenue: '$89.97' },
-  { id: '#1017', date: 'Oct 21, 2023', product: 'Wireless Mouse', category: 'Electronics', quantity: 8, revenue: '$399.92' },
-];
+const filename = Astro.url.searchParams.get("file");
+
+let data: any[] = [];
+let columns: TableColumn[] = [];
+let error = null;
+
+if (filename) {
+  // User asked to show filename without extension in recent files, but usually breadcrumbs show full context or just name.
+  // I'll show what's passed in query param.
+
+  const filePath = path.join(process.cwd(), "files", filename); // filename from query might not have extension if we stripped it in links
+  // Wait, if links strip extension, I need to know the extension to find the file.
+  // Or I assume .csv? Or I search for it?
+  // The user asked to *show* it without extension in the UI. But the query param should probably identify the file.
+  // If `FileTable` links to `/visualizer?file=sales_data`, how do I know it's `.csv`?
+  // I should probably pass the full filename in the URL but show it stripped in the UI.
+  // Or I can try to append extensions.
+  // Let's assume the link passes the FULL filename (with extension) but the UI shows it stripped *in the link text*.
+  // PROCEEDING WITH assumption: query param = full filename.
+
+  const result = await parseCSV(filePath);
+
+  if (result.error) {
+    error = result.error;
+  } else {
+    data = result.data;
+    if (data.length > 0) {
+      // Derive columns from first row keys
+      const keys = Object.keys(data[0]);
+      columns = keys.map((key) => ({
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " "),
+        // Heuristic for alignment
+        align: /quantity|amount|price|revenue|total/i.test(key)
+          ? "right"
+          : "left",
+      }));
+      // Add actions column if needed, or leave it out for read-only
+      columns.push({ key: "actions", label: "", width: "w-10" });
+    }
+  }
+}
 
 // Configuración de breadcrumb
 const breadcrumb = [
-  { label: 'Visualizer', href: '/visualizer' },
-  { label: 'sales_data_q3.csv' }
+  { label: "Visualizer", href: "/visualizer" },
+  ...(filename ? [{ label: filename }] : []),
 ];
 ---
 
 <AppLayout title="DataFlow - CSV Visualizer">
   <Sidebar currentPage="visualizer" />
   <div class="flex-1 flex flex-col h-full">
-    <Header breadcrumb={breadcrumb} />
+    <Header breadcrumbItems={breadcrumb} />
     <MainContent>
       <!-- Toolbar con filtros y botones -->
       <DataToolbar totalRecords={12403} displayedRecords={50} />
 
       <!-- Contenedor de tabla con scroll -->
       <div class="flex-1 overflow-hidden px-8 pb-8 flex flex-col">
-        <div class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden">
+        <div
+          class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden"
+        >
           <!-- Tabla de datos CSV -->
-          <CSVTable data={mockData} />
+          <!-- Tabla de datos CSV -->
+          {
+            error ? (
+              <div class="flex flex-col items-center justify-center py-20 text-center">
+                <Icon name="error" size="lg" class="text-red-500 mb-4" />
+                <h3 class="text-xl font-semibold text-text-off-white mb-2">
+                  Error loading file
+                </h3>
+                <p class="text-text-light-gray">{error}</p>
+                <a
+                  href="/files"
+                  class="mt-6 px-4 py-2 bg-vibrant-blue text-text-off-white rounded hover:bg-primary-hover transition-colors"
+                >
+                  Go back to files
+                </a>
+              </div>
+            ) : (
+              <CSVTable data={data} columns={columns} />
+            )
+          }
 
           <!-- Footer con paginación -->
-          <div class="border-t border-border-dark bg-surface-card p-3 flex items-center justify-between">
+          <div
+            class="border-t border-border-dark bg-surface-card p-3 flex items-center justify-between"
+          >
             <div class="flex items-center gap-2">
               <span class="text-xs text-text-light-gray">Rows per page:</span>
-              <select class="bg-background-dark border border-border-dark rounded text-xs text-text-off-white py-1 pl-2 pr-6 focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue">
+              <select
+                class="bg-background-dark border border-border-dark rounded text-xs text-text-off-white py-1 pl-2 pr-6 focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue"
+              >
                 <option>10</option>
                 <option>25</option>
                 <option selected>50</option>
@@ -62,14 +119,20 @@ const breadcrumb = [
             </div>
 
             <div class="flex items-center gap-2">
-              <button class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50">
+              <button
+                class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50"
+              >
                 <Icon name="first_page" size="sm" />
               </button>
-              <button class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50">
+              <button
+                class="p-1 rounded hover:bg-white/10 text-text-light-gray disabled:opacity-50"
+              >
                 <Icon name="chevron_left" size="sm" />
               </button>
               <span class="text-xs text-text-light-gray mx-2">
-                Page <span class="text-text-off-white font-medium">1</span> of <span class="text-text-off-white font-medium">24</span>
+                Page <span class="text-text-off-white font-medium">1</span> of <span
+                  class="text-text-off-white font-medium">24</span
+                >
               </span>
               <button class="p-1 rounded hover:bg-white/10 text-text-off-white">
                 <Icon name="chevron_right" size="sm" />

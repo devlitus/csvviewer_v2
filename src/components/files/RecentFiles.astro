@@ -4,6 +4,7 @@ import FileCard from "./FileCard.astro";
 interface FileData {
   id: string;
   filename: string;
+  originalFilename?: string;
   size: string;
   date: string;
   status: "processed" | "mapping_needed";
@@ -95,6 +96,7 @@ if (propFiles) {
     files = fileStats.map((item) => ({
       id: randomUUID(),
       filename: truncateFilename(item.filename),
+      originalFilename: item.filename, // Keep original for link
       size: formatSize(item.stats.size),
       date: getRelativeTime(item.stats.mtime),
       status: "processed",
@@ -130,6 +132,7 @@ if (propFiles) {
       files.map((file) => (
         <FileCard
           filename={file.filename}
+          fullFilename={file.originalFilename || file.filename}
           size={file.size}
           date={file.date}
           status={file.status}

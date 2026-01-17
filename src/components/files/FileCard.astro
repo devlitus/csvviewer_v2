@@ -1,53 +1,89 @@
 ---
 interface Props {
   filename: string;
+  fullFilename?: string;
   size: string;
   date: string;
-  status: 'processed' | 'mapping_needed';
+  status: "processed" | "mapping_needed";
   icon: string;
   iconColor?: string;
 }
 
 const {
   filename,
+  fullFilename,
   size,
   date,
   status,
   icon,
-  iconColor = '#3B82F6'
+  iconColor = "#3B82F6",
 } = Astro.props as Props;
 
-const statusText = status === 'processed' ? 'Processed' : 'Mapping Needed';
-const statusIcon = status === 'processed' ? 'check_circle' : 'warning';
+const linkHref = `/visualizer?file=${fullFilename || filename}`;
+
+const statusText = status === "processed" ? "Processed" : "Mapping Needed";
+const statusIcon = status === "processed" ? "check_circle" : "warning";
 
 // Map icon to color scheme for Tailwind classes
-const colorSchemes: Record<string, { bgClass: string; textClass: string; statusColor: string }> = {
-  'table_view': { bgClass: 'bg-green-500/10', textClass: 'text-green-400', statusColor: 'text-green-400' },
-  'inventory_2': { bgClass: 'bg-vibrant-blue/10', textClass: 'text-vibrant-blue', statusColor: 'text-green-400' },
-  'contacts': { bgClass: 'bg-purple-500/10', textClass: 'text-purple-400', statusColor: 'text-orange-400' },
+const colorSchemes: Record<
+  string,
+  { bgClass: string; textClass: string; statusColor: string }
+> = {
+  table_view: {
+    bgClass: "bg-green-500/10",
+    textClass: "text-green-400",
+    statusColor: "text-green-400",
+  },
+  inventory_2: {
+    bgClass: "bg-vibrant-blue/10",
+    textClass: "text-vibrant-blue",
+    statusColor: "text-green-400",
+  },
+  contacts: {
+    bgClass: "bg-purple-500/10",
+    textClass: "text-purple-400",
+    statusColor: "text-orange-400",
+  },
 };
 
-const colorScheme = colorSchemes[icon] || { bgClass: 'bg-vibrant-blue/10', textClass: 'text-vibrant-blue', statusColor: 'text-green-400' };
-const statusColorClass = status === 'processed' ? colorScheme.statusColor : 'text-orange-400';
+const colorScheme = colorSchemes[icon] || {
+  bgClass: "bg-vibrant-blue/10",
+  textClass: "text-vibrant-blue",
+  statusColor: "text-green-400",
+};
+const statusColorClass =
+  status === "processed" ? colorScheme.statusColor : "text-orange-400";
 ---
 
-<div class="group relative flex flex-col p-4 bg-surface-card border border-border-dark rounded-xl hover:shadow-2xl hover:border-vibrant-blue/30 transition-all duration-300 cursor-pointer">
+<a
+  href={linkHref}
+  class="block group relative flex flex-col p-4 bg-surface-card border border-border-dark rounded-xl hover:shadow-2xl hover:border-vibrant-blue/30 transition-all duration-300 cursor-pointer text-left decoration-transparent"
+>
   <div class="flex items-start justify-between mb-3">
     <!-- Icon -->
-    <div class={`p-2 ${colorScheme.bgClass} ${colorScheme.textClass} rounded-lg flex items-center justify-center flex-shrink-0`}>
+    <div
+      class={`p-2 ${colorScheme.bgClass} ${colorScheme.textClass} rounded-lg flex items-center justify-center flex-shrink-0`}
+    >
       <span class="material-symbols-outlined w-6 h-6" style="font-size: 24px;">
         {icon}
       </span>
     </div>
 
     <!-- Menu Button -->
-    <button class="text-text-light-gray hover:text-text-off-white p-1 rounded-md hover:bg-white/5 transition-colors">
-      <span class="material-symbols-outlined w-5 h-5" style="font-size: 20px;">more_vert</span>
+    <button
+      class="text-text-light-gray hover:text-text-off-white p-1 rounded-md hover:bg-white/5 transition-colors"
+      onclick="event.preventDefault();"
+    >
+      <span class="material-symbols-outlined w-5 h-5" style="font-size: 20px;"
+        >more_vert</span
+      >
     </button>
   </div>
 
   <!-- Filename -->
-  <h3 class="text-base font-bold text-text-off-white mb-1 group-hover:text-vibrant-blue transition-colors truncate">
+  <h3
+    class="text-base font-bold text-text-off-white mb-1 group-hover:text-vibrant-blue transition-colors truncate"
+  >
     {filename}
   </h3>
 
@@ -59,13 +95,21 @@ const statusColorClass = status === 'processed' ? colorScheme.statusColor : 'tex
   </div>
 
   <!-- Status Footer -->
-  <div class="mt-auto pt-3 border-t border-border-dark/50 flex items-center justify-between">
-    <span class={`text-xs font-medium ${statusColorClass} flex items-center gap-1`}>
-      <span class="material-symbols-outlined" style="font-size: 14px;">{statusIcon}</span>
+  <div
+    class="mt-auto pt-3 border-t border-border-dark/50 flex items-center justify-between"
+  >
+    <span
+      class={`text-xs font-medium ${statusColorClass} flex items-center gap-1`}
+    >
+      <span class="material-symbols-outlined" style="font-size: 14px;"
+        >{statusIcon}</span
+      >
       {statusText}
     </span>
-    <span class="text-xs font-medium text-vibrant-blue opacity-0 group-hover:opacity-100 transition-opacity">
+    <span
+      class="text-xs font-medium text-vibrant-blue opacity-0 group-hover:opacity-100 transition-opacity"
+    >
       Open File
     </span>
   </div>
-</div>
+</a>
