@@ -4,35 +4,35 @@ import CSVTableRow from "./CSVTableRow.astro";
 
 // Definición de tipos
 interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-  align?: "left" | "right";
-  icon?: "unfold_more" | "arrow_downward" | "filter_list";
-  width?: string;
+    key: string;
+    label: string;
+    sortable?: boolean;
+    align?: "left" | "right";
+    icon?: "unfold_more" | "arrow_downward" | "filter_list";
+    width?: string;
 }
 
 interface Props {
-  data: any[];
-  columns: Column[];
+    data: any[];
+    columns: Column[];
 }
 
 const { data, columns } = Astro.props;
 ---
 
 <div class="overflow-auto flex-1 w-full">
-  <table class="min-w-full text-left text-sm whitespace-nowrap">
-    <CSVTableHeader columns={columns} />
-    <tbody class="divide-y divide-border-dark/50 text-text-off-white">
-      {
-        data.map((row, index) => (
-          <CSVTableRow
-            row={row}
-            columns={columns}
-            alternate={index % 2 === 1}
-          />
-        ))
-      }
-    </tbody>
-  </table>
+    <table class="w-full text-left text-sm whitespace-nowrap">
+        <CSVTableHeader columns={columns} />
+        <tbody class="divide-y divide-border-dark/50 text-text-off-white">
+            {
+                data.map((row, index) => (
+                    <CSVTableRow
+                        row={row}
+                        columns={columns}
+                        alternate={index % 2 === 1}
+                    />
+                ))
+            }
+        </tbody>
+    </table>
 </div>

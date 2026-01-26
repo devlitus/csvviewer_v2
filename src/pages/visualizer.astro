@@ -12,10 +12,10 @@ import { parseCSV } from "../utils/csvParser";
 
 // Definición de Column interface para el componente padre
 interface TableColumn {
-  key: string;
-  label: string;
-  width?: string;
-  align?: "left" | "right";
+    key: string;
+    label: string;
+    width?: string;
+    align?: "left" | "right";
 }
 
 const filename = Astro.url.searchParams.get("file");
@@ -34,180 +34,204 @@ let columns: TableColumn[] = [];
 let error = null;
 
 if (filename) {
-  const filePath = path.join(process.cwd(), "files", filename);
+    const filePath = path.join(process.cwd(), "files", filename);
 
-  const result = await parseCSV(filePath);
+    const result = await parseCSV(filePath);
 
-  if (result.error) {
-    error = result.error;
-  } else {
-    data = result.data;
-    if (data.length > 0) {
-      // Derive columns from first row keys
-      const keys = Object.keys(data[0]);
-      columns = keys.map((key) => ({
-        key,
-        label: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " "),
-        // Heuristic for alignment
-        align: /quantity|amount|price|revenue|total/i.test(key)
-          ? "right"
-          : "left",
-      }));
-      // Add actions column if needed, or leave it out for read-only
-      // Add actions column if needed, or leave it out for read-only
-      columns.push({ key: "actions", label: "", width: "w-10" });
+    if (result.error) {
+        error = result.error;
+    } else {
+        data = result.data;
+        if (data.length > 0) {
+            // Derive columns from first row keys
+            const keys = Object.keys(data[0]);
+            columns = keys.map((key) => ({
+                key,
+                label:
+                    key.charAt(0).toUpperCase() +
+                    key.slice(1).replace(/_/g, " "),
+                // Heuristic for alignment
+                align: /quantity|amount|price|revenue|total/i.test(key)
+                    ? "right"
+                    : "left",
+            }));
+            // Add actions column if needed, or leave it out for read-only
+            // Add actions column if needed, or leave it out for read-only
+            columns.push({ key: "actions", label: "", width: "w-10" });
 
-      // Pagination Logic
-      totalRecords = data.length;
-      limit = limitParam === "all" ? totalRecords : parseInt(limitParam, 10);
-      totalPages = Math.ceil(totalRecords / limit);
+            // Pagination Logic
+            totalRecords = data.length;
+            limit =
+                limitParam === "all" ? totalRecords : parseInt(limitParam, 10);
+            totalPages = Math.ceil(totalRecords / limit);
 
-      // Ensure currentPage is valid
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+            // Ensure currentPage is valid
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages && totalPages > 0)
+                currentPage = totalPages;
 
-      const startIndex = (currentPage - 1) * limit;
-      startRecord = Math.min(startIndex + 1, totalRecords);
-      endRecord = Math.min(startIndex + limit, totalRecords);
+            const startIndex = (currentPage - 1) * limit;
+            startRecord = Math.min(startIndex + 1, totalRecords);
+            endRecord = Math.min(startIndex + limit, totalRecords);
 
-      paginatedData = data.slice(startIndex, endRecord);
+            paginatedData = data.slice(startIndex, endRecord);
+        }
     }
-  }
 }
 
 // Function to generate URL for pagination
 const getPageUrl = (p: number) => {
-  const params = new URLSearchParams(Astro.url.searchParams);
-  params.set("page", p.toString());
-  return `?${params.toString()}`;
+    const params = new URLSearchParams(Astro.url.searchParams);
+    params.set("page", p.toString());
+    return `?${params.toString()}`;
 };
 
 // Configuración de breadcrumb
 const breadcrumb = [
-  { label: "Visualizer", href: "/visualizer" },
-  ...(filename ? [{ label: filename }] : []),
+    { label: "Visualizer", href: "/visualizer" },
+    ...(filename ? [{ label: filename }] : []),
 ];
 ---
 
 <AppLayout title="DataFlow - CSV Visualizer">
-  <Sidebar currentPage="visualizer" />
-  <div class="flex-1 flex flex-col h-full">
-    <Header breadcrumbItems={breadcrumb} />
-    <MainContent>
-      <!-- Toolbar con filtros y botones -->
-      <DataToolbar
-        totalRecords={totalRecords}
-        startRecord={startRecord}
-        endRecord={endRecord}
-        columns={columns}
-      />
+    <Sidebar currentPage="visualizer" />
+    <div class="flex-1 flex flex-col h-full min-w-0">
+        <Header breadcrumbItems={breadcrumb} />
+        <MainContent>
+            <!-- Toolbar con filtros y botones -->
+            <DataToolbar
+                totalRecords={totalRecords}
+                startRecord={startRecord}
+                endRecord={endRecord}
+                columns={columns}
+            />
 
-      <!-- Contenedor de tabla con scroll -->
-      <div class="flex-1 overflow-hidden px-8 pb-8 flex flex-col">
-        <div
-          class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden"
-        >
-          <!-- Tabla de datos CSV -->
-          {
-            error ? (
-              <div class="flex flex-col items-center justify-center py-20 text-center">
-                <Icon name="error" size="lg" class="text-red-500 mb-4" />
-                <h3 class="text-xl font-semibold text-text-off-white mb-2">
-                  Error loading file
-                </h3>
-                <p class="text-text-light-gray">{error}</p>
-                <a
-                  href="/files"
-                  class="mt-6 px-4 py-2 bg-vibrant-blue text-text-off-white rounded hover:bg-primary-hover transition-colors"
+            <!-- Contenedor de tabla con scroll -->
+            <div class="flex-1 overflow-hidden px-8 pb-8 flex flex-col min-w-0">
+                <div
+                    class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden min-w-0"
                 >
-                  Go back to files
-                </a>
-              </div>
-            ) : (
-              <CSVTable data={paginatedData} columns={columns} />
-            )
-          }
+                    <!-- Tabla de datos CSV -->
+                    {
+                        error ? (
+                            <div class="flex flex-col items-center justify-center py-20 text-center">
+                                <Icon
+                                    name="error"
+                                    size="lg"
+                                    class="text-red-500 mb-4"
+                                />
+                                <h3 class="text-xl font-semibold text-text-off-white mb-2">
+                                    Error loading file
+                                </h3>
+                                <p class="text-text-light-gray">{error}</p>
+                                <a
+                                    href="/files"
+                                    class="mt-6 px-4 py-2 bg-vibrant-blue text-text-off-white rounded hover:bg-primary-hover transition-colors"
+                                >
+                                    Go back to files
+                                </a>
+                            </div>
+                        ) : (
+                            <CSVTable data={paginatedData} columns={columns} />
+                        )
+                    }
 
-          <!-- Footer con paginación -->
-          <div
-            class="border-t border-border-dark bg-surface-card p-3 flex items-center justify-between"
-          >
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-text-light-gray">Rows per page:</span>
-              <select
-                id="rows-per-page"
-                class="bg-background-dark border border-border-dark rounded text-xs text-text-off-white py-1 pl-2 pr-6 focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue"
-              >
-                <option value="10" selected={limit === 10}>10</option>
-                <option value="25" selected={limit === 25}>25</option>
-                <option value="50" selected={limit === 50}>50</option>
-                <option value="100" selected={limit === 100}>100</option>
-                <option
-                  value="all"
-                  selected={limit === totalRecords && limitParam === "all"}
-                  >All</option
-                >
-              </select>
+                    <!-- Footer con paginación -->
+                    <div
+                        class="border-t border-border-dark bg-surface-card p-3 flex items-center justify-between"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-text-light-gray"
+                                >Rows per page:</span
+                            >
+                            <select
+                                id="rows-per-page"
+                                class="bg-background-dark border border-border-dark rounded text-xs text-text-off-white py-1 pl-2 pr-6 focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue"
+                            >
+                                <option value="10" selected={limit === 10}
+                                    >10</option
+                                >
+                                <option value="25" selected={limit === 25}
+                                    >25</option
+                                >
+                                <option value="50" selected={limit === 50}
+                                    >50</option
+                                >
+                                <option value="100" selected={limit === 100}
+                                    >100</option
+                                >
+                                <option
+                                    value="all"
+                                    selected={limit === totalRecords &&
+                                        limitParam === "all"}>All</option
+                                >
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <a
+                                href={currentPage > 1
+                                    ? getPageUrl(1)
+                                    : undefined}
+                                class={`p-1 rounded text-text-light-gray ${currentPage > 1 ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
+                                aria-disabled={currentPage <= 1}
+                            >
+                                <Icon name="first_page" size="sm" />
+                            </a>
+                            <a
+                                href={currentPage > 1
+                                    ? getPageUrl(currentPage - 1)
+                                    : undefined}
+                                class={`p-1 rounded text-text-light-gray ${currentPage > 1 ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
+                                aria-disabled={currentPage <= 1}
+                            >
+                                <Icon name="chevron_left" size="sm" />
+                            </a>
+                            <span class="text-xs text-text-light-gray mx-2">
+                                Page <span
+                                    class="text-text-off-white font-medium"
+                                    >{currentPage}</span
+                                > of <span
+                                    class="text-text-off-white font-medium"
+                                    >{totalPages}</span
+                                >
+                            </span>
+                            <a
+                                href={currentPage < totalPages
+                                    ? getPageUrl(currentPage + 1)
+                                    : undefined}
+                                class={`p-1 rounded text-text-off-white ${currentPage < totalPages ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
+                                aria-disabled={currentPage >= totalPages}
+                            >
+                                <Icon name="chevron_right" size="sm" />
+                            </a>
+                            <a
+                                href={currentPage < totalPages
+                                    ? getPageUrl(totalPages)
+                                    : undefined}
+                                class={`p-1 rounded text-text-off-white ${currentPage < totalPages ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
+                                aria-disabled={currentPage >= totalPages}
+                            >
+                                <Icon name="last_page" size="sm" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="flex items-center gap-2">
-              <a
-                href={currentPage > 1 ? getPageUrl(1) : undefined}
-                class={`p-1 rounded text-text-light-gray ${currentPage > 1 ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
-                aria-disabled={currentPage <= 1}
-              >
-                <Icon name="first_page" size="sm" />
-              </a>
-              <a
-                href={currentPage > 1 ? getPageUrl(currentPage - 1) : undefined}
-                class={`p-1 rounded text-text-light-gray ${currentPage > 1 ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
-                aria-disabled={currentPage <= 1}
-              >
-                <Icon name="chevron_left" size="sm" />
-              </a>
-              <span class="text-xs text-text-light-gray mx-2">
-                Page <span class="text-text-off-white font-medium"
-                  >{currentPage}</span
-                > of <span class="text-text-off-white font-medium"
-                  >{totalPages}</span
-                >
-              </span>
-              <a
-                href={currentPage < totalPages
-                  ? getPageUrl(currentPage + 1)
-                  : undefined}
-                class={`p-1 rounded text-text-off-white ${currentPage < totalPages ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
-                aria-disabled={currentPage >= totalPages}
-              >
-                <Icon name="chevron_right" size="sm" />
-              </a>
-              <a
-                href={currentPage < totalPages
-                  ? getPageUrl(totalPages)
-                  : undefined}
-                class={`p-1 rounded text-text-off-white ${currentPage < totalPages ? "hover:bg-white/10" : "opacity-50 cursor-default"}`}
-                aria-disabled={currentPage >= totalPages}
-              >
-                <Icon name="last_page" size="sm" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </MainContent>
-  </div>
+        </MainContent>
+    </div>
 </AppLayout>
 
 <script>
-  // Handle rows per page change
-  const rowsPerPageSelect = document.getElementById("rows-per-page");
-  if (rowsPerPageSelect) {
-    rowsPerPageSelect.addEventListener("change", (e) => {
-      const limit = (e.target as HTMLSelectElement).value;
-      const url = new URL(window.location.href);
-      url.searchParams.set("limit", limit);
-      url.searchParams.set("page", "1"); // Reset to page 1
-      window.location.href = url.toString();
-    });
-  }
+    // Handle rows per page change
+    const rowsPerPageSelect = document.getElementById("rows-per-page");
+    if (rowsPerPageSelect) {
+        rowsPerPageSelect.addEventListener("change", (e) => {
+            const limit = (e.target as HTMLSelectElement).value;
+            const url = new URL(window.location.href);
+            url.searchParams.set("limit", limit);
+            url.searchParams.set("page", "1"); // Reset to page 1
+            window.location.href = url.toString();
+        });
+    }
 </script>
