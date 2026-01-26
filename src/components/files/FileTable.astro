@@ -113,6 +113,16 @@ if (propFiles) {
     files = [];
   }
 }
+
+// Pagination Logic
+const page = Number(Astro.url.searchParams.get("page") || 1);
+const filesPerPage = 9; // Adjust as needed
+const totalFiles = files.length;
+const totalPages = Math.ceil(totalFiles / filesPerPage);
+
+const start = (page - 1) * filesPerPage;
+const end = start + filesPerPage;
+const paginatedFiles = files.slice(start, end);
 ---
 
 <div
@@ -162,7 +172,7 @@ if (propFiles) {
       <!-- Tbody -->
       <tbody class="divide-y divide-border-dark/40">
         {
-          files.map((file) => (
+          paginatedFiles.map((file) => (
             <FileTableRow
               filename={file.filename}
               fullFilename={file.originalFilename || file.filename}
@@ -179,5 +189,10 @@ if (propFiles) {
   </div>
 
   <!-- Paginación -->
-  <Pagination />
+  <Pagination
+    currentPage={page}
+    totalPages={totalPages}
+    totalFiles={totalFiles}
+    filesPerPage={filesPerPage}
+  />
 </div>
