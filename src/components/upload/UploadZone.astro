@@ -44,7 +44,8 @@
       <!-- Browse Button -->
       <div class="mt-8">
         <span
-          class="bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-semibold py-2 px-6 rounded-lg shadow-md transition-colors pointer-events-none"
+          id="browse-button"
+          class="bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-semibold py-2 px-6 rounded-lg shadow-md transition-colors cursor-pointer z-10 relative"
         >
           Browse Files
         </span>
@@ -56,6 +57,7 @@
       class="hidden"
       id="file-upload"
       type="file"
+      multiple
       accept=".csv,.xls,.xlsx,.json"
     />
   </label>
@@ -66,6 +68,7 @@
       "file-upload",
     ) as HTMLInputElement;
     const uploadText = document.getElementById("upload-text");
+    const browseButton = document.getElementById("browse-button"); // New button ID
 
     if (dropZone && fileInput && uploadText) {
       // Prevent default drag behaviors
@@ -89,6 +92,14 @@
       // Handle selected files
       fileInput.addEventListener("change", handleFiles, false);
 
+      // Handle browse button click explicitly
+      if (browseButton) {
+        browseButton.addEventListener("click", (e) => {
+          e.preventDefault(); // Prevent bubbling to label if nested
+          fileInput.click();
+        });
+      }
+
       function preventDefaults(e: Event) {
         e.preventDefault();
         e.stopPropagation();
@@ -106,26 +117,28 @@
         const dt = e.dataTransfer;
         const files = dt?.files;
         if (files) {
-          handleFiles({ target: { files: files } } as unknown as Event);
+          uploadFiles(files);
         }
       }
 
-      async function handleFiles(e: Event) {
+      function handleFiles(e: Event) {
         const target = e.target as HTMLInputElement;
         const files = target.files;
         if (!files || files.length === 0) return;
-
-        const file = files[0];
-        uploadFile(file);
+        uploadFiles(files);
       }
 
-      async function uploadFile(file: File) {
+      async function uploadFiles(files: FileList) {
         const formData = new FormData();
-        formData.append("file", file);
 
-        // Show loading state
+        // Append all files to the same key "files" which the API expects
+        for (let i = 0; i < files.length; i++) {
+          formData.append("files", files[i]);
+        }
+
         const originalText = uploadText!.innerText;
-        uploadText!.innerText = `Uploading ${file.name}...`;
+        const fileCount = files.length;
+        uploadText!.innerText = `Uploading ${fileCount} file${fileCount > 1 ? "s" : ""}...`;
 
         try {
           const response = await fetch("/api/upload", {
@@ -139,15 +152,24 @@
             // Reset after 3 seconds
             setTimeout(() => {
               uploadText!.innerText = originalText;
+              window.location.reload();
             }, 3000);
-            // Optionally refresh list or redirect
+
+            // Dispatch custom event to notify other components (like RecentFiles)
+            window.dispatchEvent(new CustomEvent("files-uploaded"));
           } else {
             uploadText!.innerText = "Upload Failed";
             console.error("Upload failed");
+            setTimeout(() => {
+              uploadText!.innerText = originalText;
+            }, 3000);
           }
         } catch (error) {
           uploadText!.innerText = "Error uploading file";
           console.error("Error:", error);
+          setTimeout(() => {
+            uploadText!.innerText = originalText;
+          }, 3000);
         }
       }
     }
