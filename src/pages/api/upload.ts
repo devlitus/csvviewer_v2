@@ -4,18 +4,15 @@ import path from "node:path";
 
 export const POST: APIRoute = async ({ request }) => {
   const formData = await request.formData();
-  const file = formData.get("file") as File;
+  const files = formData.getAll("files") as File[];
 
-  if (!file) {
-    return new Response(JSON.stringify({ message: "No file uploaded" }), {
+  if (!files || files.length === 0) {
+    return new Response(JSON.stringify({ message: "No files uploaded" }), {
       status: 400,
     });
   }
 
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const fileName = file.name;
+  const savedFiles = [];
   const filesDir = path.join(process.cwd(), "files");
 
   try {
@@ -26,21 +23,40 @@ export const POST: APIRoute = async ({ request }) => {
       await fs.mkdir(filesDir);
     }
 
-    // Save file
-    await fs.writeFile(path.join(filesDir, fileName), buffer);
+    const uploadPromises = files.map(async (file) => {
+      if (!file.name.toLowerCase().endsWith(".csv")) {
+        return null; // Skip non-csv
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const fileName = file.name;
+
+      await fs.writeFile(path.join(filesDir, fileName), buffer);
+      return fileName;
+    });
+
+    const results = await Promise.all(uploadPromises);
+    const validFiles = results.filter(Boolean);
+
+    if (validFiles.length === 0) {
+      return new Response(JSON.stringify({ message: "No valid CSV files uploaded" }), {
+        status: 400,
+      });
+    }
 
     return new Response(
       JSON.stringify({
-        message: "File uploaded successfully",
-        filename: fileName,
+        message: "Files uploaded successfully",
+        files: validFiles,
       }),
       {
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Error saving file:", error);
-    return new Response(JSON.stringify({ message: "Error saving file" }), {
+    console.error("Error saving files:", error);
+    return new Response(JSON.stringify({ message: "Error saving files" }), {
       status: 500,
     });
   }

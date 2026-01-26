@@ -24,6 +24,7 @@ import FileTable from "../components/files/FileTable.astro";
           </p>
         </div>
         <button
+          id="uploadButton"
           class="bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-bold h-10 px-6 rounded-lg shadow-md flex items-center gap-2 transition-all active:scale-95"
         >
           <span class="material-symbols-outlined" style="font-size: 20px;"
@@ -31,6 +32,13 @@ import FileTable from "../components/files/FileTable.astro";
           >
           <span>Upload New</span>
         </button>
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          accept=".csv"
+          class="hidden"
+        />
       </div>
 
       <!-- Tabla de archivos -->
@@ -40,3 +48,44 @@ import FileTable from "../components/files/FileTable.astro";
     </MainContent>
   </div>
 </AppLayout>
+
+<script>
+  const uploadButton = document.getElementById("uploadButton");
+  const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+
+  if (uploadButton && fileInput) {
+    uploadButton.addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", async () => {
+      const files = fileInput.files;
+      if (!files || files.length === 0) return;
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          const result = await response.json();
+          alert("Upload failed: " + (result.message || "Unknown error"));
+        }
+      } catch (error) {
+        console.error("Error uploading files:", error);
+        alert("Error uploading files");
+      }
+
+      // Reset input value to allow re-uploading same file if needed
+      fileInput.value = "";
+    });
+  }
+</script>
