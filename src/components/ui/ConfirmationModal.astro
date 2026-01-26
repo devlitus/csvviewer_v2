@@ -1,0 +1,87 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmType?: "danger" | "primary";
+}
+
+const {
+  id,
+  title,
+  description,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  confirmType = "primary",
+} = Astro.props;
+
+const confirmBtnClass =
+  confirmType === "danger"
+    ? "bg-red-500 hover:bg-red-600 text-white"
+    : "bg-vibrant-blue hover:bg-primary-hover text-white";
+---
+
+<div
+  id={id}
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 modal-backdrop"></div>
+
+  <!-- Modal Content -->
+  <div
+    class="relative bg-background-dark border border-border-dark shadow-2xl rounded-xl w-full max-w-md transform scale-95 transition-transform duration-200"
+  >
+    <div class="p-6">
+      <h3 class="text-xl font-bold text-text-off-white mb-2">{title}</h3>
+      <p class="text-text-light-gray mb-6">{description}</p>
+
+      <div class="flex justify-end gap-3">
+        <button
+          class="px-4 py-2 text-sm font-medium text-text-light-gray hover:text-text-off-white hover:bg-white/5 rounded-lg transition-colors modal-cancel-btn"
+        >
+          {cancelText}
+        </button>
+        <button
+          class={`px-4 py-2 text-sm font-bold rounded-lg transition-colors shadow-md modal-confirm-btn ${confirmBtnClass}`}
+        >
+          {confirmText}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ id }}>
+  const modal = document.getElementById(id);
+  const backdrop = modal?.querySelector(".modal-backdrop");
+  const cancelBtn = modal?.querySelector(".modal-cancel-btn");
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add("opacity-0");
+    modal.querySelector("div[class*='relative']")?.classList.add("scale-95");
+    modal
+      .querySelector("div[class*='relative']")
+      ?.classList.remove("scale-100");
+
+    setTimeout(() => {
+      modal.classList.add("hidden");
+    }, 200);
+  }
+
+  // Close on backdrop click
+  backdrop?.addEventListener("click", closeModal);
+  // Close on cancel click
+  cancelBtn?.addEventListener("click", closeModal);
+
+  // Expose open function to window for global access if needed,
+  // or rely on scripts toggling classes directly.
+  // For better encapsulation, we can dispatch custom events or observe attributes.
+  // But simplistic class toggling is fine for this scope.
+</script>

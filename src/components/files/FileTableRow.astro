@@ -61,6 +61,16 @@ const statusInfo = statusConfig[status];
 >
   <td class="px-6 py-4">
     <div class="flex items-center gap-3">
+      <div
+        class="flex items-center justify-center p-2 rounded-lg hover:bg-white/5 transition-colors"
+        onclick="event.stopPropagation()"
+      >
+        <input
+          type="checkbox"
+          class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-vibrant-blue focus:ring-vibrant-blue focus:ring-offset-gray-800 file-checkbox"
+          data-filename={fullFilename || filename}
+        />
+      </div>
       <!-- Icono con color background -->
       <div class={`p-2 ${colorScheme.bg} ${colorScheme.text} rounded-lg`}>
         <span class="material-symbols-outlined" style="font-size: 22px;">
