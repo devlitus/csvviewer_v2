@@ -1,23 +1,41 @@
 ---
-import SearchInput from '../ui/SearchInput.astro';
-import Breadcrumb from '../ui/Breadcrumb.astro';
+import SearchInput from "../ui/SearchInput.astro";
+import Breadcrumb from "../ui/Breadcrumb.astro";
 
 interface Props {
   currentPage?: string;
   breadcrumbItems?: Array<{ label: string; href?: string }>;
 }
 
-const {
-  currentPage = 'Upload',
-  breadcrumbItems = [{ label: 'Upload' }]
-} = Astro.props as Props;
+const { currentPage = "Upload", breadcrumbItems = [{ label: "Upload" }] } =
+  Astro.props as Props;
 ---
 
-<header class="h-16 bg-surface-dark border-b border-border-dark/50 px-8 flex items-center justify-between gap-6">
-  <div class="flex-1">
-    <Breadcrumb items={breadcrumbItems} />
+<header
+  class="h-16 bg-surface-dark border-b border-border-dark/50 px-4 md:px-8 flex items-center justify-between gap-4 md:gap-6 flex-shrink-0"
+>
+  <div class="flex items-center gap-4 flex-1">
+    <button
+      id="open-sidebar"
+      class="md:hidden text-text-light-gray hover:text-white"
+    >
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <div class="flex-1">
+      <Breadcrumb items={breadcrumbItems} />
+    </div>
   </div>
-  <div class="w-full max-w-sm">
+  <div class="w-full max-w-[200px] md:max-w-sm hidden sm:block">
     <SearchInput placeholder="Search files..." />
   </div>
+  <button class="sm:hidden text-text-light-gray hover:text-white">
+    <span class="material-symbols-outlined">search</span>
+  </button>
 </header>
+
+<script>
+  const openBtn = document.getElementById("open-sidebar");
+  openBtn?.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("open-sidebar"));
+  });
+</script>

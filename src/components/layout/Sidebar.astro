@@ -12,33 +12,65 @@ const { currentPage = "upload" } = Astro.props as Props;
 ---
 
 <aside
-  class="w-64 bg-background-dark border-r border-border-dark flex flex-col h-full overflow-y-auto"
+  id="main-sidebar"
+  class="fixed inset-y-0 left-0 z-50 w-64 bg-background-dark border-r border-border-dark flex flex-col h-full transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex"
 >
   <!-- Logo -->
-  <div class="p-6 border-b border-border-dark">
+  <div
+    class="p-6 border-b border-border-dark flex justify-between items-center"
+  >
     <Logo />
+    <button
+      id="close-sidebar"
+      class="md:hidden text-text-light-gray hover:text-white"
+    >
+      <span class="material-symbols-outlined">close</span>
+    </button>
   </div>
 
   <!-- Navigation Menu -->
-  <div class="flex-1 px-4 py-6">
+  <div class="flex-1 px-4 py-6 overflow-y-auto">
     <NavMenu currentPage={currentPage} />
   </div>
-
-  <!-- New Project Button -->
-  <!-- <div class="px-4 py-4 border-t border-border-dark">
-    <Button variant="primary" fullWidth>
-      <span class="material-symbols-outlined inline-block mr-2 w-5 h-5" style="font-size: 20px;">
-        add_circle
-      </span>
-      New Project
-    </Button>
-  </div> -->
 
   <!-- User Profile -->
   <div class="px-2 py-4 border-t border-border-dark">
     <UserProfile />
   </div>
 </aside>
+
+<!-- Overlay for mobile -->
+<div
+  id="sidebar-overlay"
+  class="fixed inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"
+>
+</div>
+
+<script>
+  const sidebar = document.getElementById("main-sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+  const closeBtn = document.getElementById("close-sidebar");
+
+  function closeSidebar() {
+    sidebar?.classList.add("-translate-x-full");
+    overlay?.classList.add("hidden", "opacity-0");
+    overlay?.classList.remove("opacity-100");
+  }
+
+  closeBtn?.addEventListener("click", closeSidebar);
+  overlay?.addEventListener("click", closeSidebar);
+
+  // Listen for open event from Header
+  document.addEventListener("open-sidebar", () => {
+    sidebar?.classList.remove("-translate-x-full");
+    overlay?.classList.remove("hidden");
+    // Small delay to allow display:block to apply before opacity transition
+    setTimeout(() => {
+      overlay?.classList.add("opacity-100");
+      overlay?.classList.remove("opacity-0");
+    }, 10);
+  });
+</script>
 
 <style>
   aside::-webkit-scrollbar {

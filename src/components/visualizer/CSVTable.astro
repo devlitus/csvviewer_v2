@@ -21,7 +21,7 @@ const { data, columns } = Astro.props;
 ---
 
 <div class="overflow-auto flex-1 w-full">
-  <table class="w-full text-left text-sm whitespace-nowrap">
+  <table class="min-w-full text-left text-sm whitespace-nowrap">
     <CSVTableHeader columns={columns} />
     <tbody class="divide-y divide-border-dark/50 text-text-off-white">
       {
