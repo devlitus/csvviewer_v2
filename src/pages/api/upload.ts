@@ -13,8 +13,10 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const savedFiles = [];
-  // const filesDir = path.join(process.cwd(), "files");
-  const filesDir = "/temp/csvfiles";
+  const isProduction = process.env.NODE_ENV === "production";
+  const filesDir = isProduction
+    ? "/tmp/csvfiles"
+    : path.join(process.cwd(), "files");
   try {
     // Ensure files directory exists
     try {
