@@ -2,7 +2,8 @@
 name: planner
 description: Experto en planificacion de features, refactoring y arquitectura. Usa proactivamente cuando el usuario necesite planificar una implementacion, disenar arquitectura o evaluar decisiones tecnicas. Nunca escribe codigo.
 tools: Read, Grep, Glob, WebSearch, WebFetch, Bash, Write, Edit
-model: sonnet
+model: opus
+color: "#6B8E23"
 hooks:
   PreToolUse:
     - matcher: "Write|Edit"
