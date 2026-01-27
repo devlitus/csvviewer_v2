@@ -13,8 +13,8 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const savedFiles = [];
-  const filesDir = path.join(process.cwd(), "files");
-
+  // const filesDir = path.join(process.cwd(), "files");
+  const filesDir = "/temp/csvfiles";
   try {
     // Ensure files directory exists
     try {
@@ -40,9 +40,12 @@ export const POST: APIRoute = async ({ request }) => {
     const validFiles = results.filter(Boolean);
 
     if (validFiles.length === 0) {
-      return new Response(JSON.stringify({ message: "No valid CSV files uploaded" }), {
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({ message: "No valid CSV files uploaded" }),
+        {
+          status: 400,
+        },
+      );
     }
 
     return new Response(
@@ -52,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
       }),
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error("Error saving files:", error);
