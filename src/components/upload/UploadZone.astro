@@ -35,20 +35,10 @@
         class="flex items-center gap-2 bg-surface-dark border border-border-dark rounded-lg px-3 py-1.5 shadow-sm"
       >
         <span class="text-xs font-mono text-text-light-gray"
-          >Supports: .csv, .xls, .json</span
+          >Supports: .csv</span
         >
         <span class="w-1 h-1 bg-text-light-gray rounded-full"></span>
         <span class="text-xs font-mono text-text-light-gray">Max 50MB</span>
-      </div>
-
-      <!-- Browse Button -->
-      <div class="mt-8">
-        <span
-          id="browse-button"
-          class="bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-semibold py-2 px-6 rounded-lg shadow-md transition-colors cursor-pointer z-10 relative"
-        >
-          Browse Files
-        </span>
       </div>
     </div>
 
@@ -58,122 +48,11 @@
       id="file-upload"
       type="file"
       multiple
-      accept=".csv,.xls,.xlsx,.json"
+      accept=".csv"
     />
   </label>
 
-  <script>
-    const dropZone = document.getElementById("drop-zone");
-    const fileInput = document.getElementById(
-      "file-upload",
-    ) as HTMLInputElement;
-    const uploadText = document.getElementById("upload-text");
-    const browseButton = document.getElementById("browse-button"); // New button ID
-
-    if (dropZone && fileInput && uploadText) {
-      // Prevent default drag behaviors
-      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-      });
-
-      // Highlight drop zone when item is dragged over it
-      ["dragenter", "dragover"].forEach((eventName) => {
-        dropZone.addEventListener(eventName, highlight, false);
-      });
-
-      ["dragleave", "drop"].forEach((eventName) => {
-        dropZone.addEventListener(eventName, unhighlight, false);
-      });
-
-      // Handle dropped files
-      dropZone.addEventListener("drop", handleDrop, false);
-
-      // Handle selected files
-      fileInput.addEventListener("change", handleFiles, false);
-
-      // Handle browse button click explicitly
-      if (browseButton) {
-        browseButton.addEventListener("click", (e) => {
-          e.preventDefault(); // Prevent bubbling to label if nested
-          fileInput.click();
-        });
-      }
-
-      function preventDefaults(e: Event) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
-      function highlight() {
-        dropZone?.classList.add("border-vibrant-blue", "bg-vibrant-blue/5");
-      }
-
-      function unhighlight() {
-        dropZone?.classList.remove("border-vibrant-blue", "bg-vibrant-blue/5");
-      }
-
-      function handleDrop(e: DragEvent) {
-        const dt = e.dataTransfer;
-        const files = dt?.files;
-        if (files) {
-          uploadFiles(files);
-        }
-      }
-
-      function handleFiles(e: Event) {
-        const target = e.target as HTMLInputElement;
-        const files = target.files;
-        if (!files || files.length === 0) return;
-        uploadFiles(files);
-      }
-
-      async function uploadFiles(files: FileList) {
-        const formData = new FormData();
-
-        // Append all files to the same key "files" which the API expects
-        for (let i = 0; i < files.length; i++) {
-          formData.append("files", files[i]);
-        }
-
-        const originalText = uploadText!.innerText;
-        const fileCount = files.length;
-        uploadText!.innerText = `Uploading ${fileCount} file${fileCount > 1 ? "s" : ""}...`;
-
-        try {
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            uploadText!.innerText = "Upload Successful!";
-            // Reset after 3 seconds
-            setTimeout(() => {
-              uploadText!.innerText = originalText;
-              window.location.reload();
-            }, 3000);
-
-            // Dispatch custom event to notify other components (like RecentFiles)
-            window.dispatchEvent(new CustomEvent("files-uploaded"));
-          } else {
-            uploadText!.innerText = "Upload Failed";
-            console.error("Upload failed");
-            setTimeout(() => {
-              uploadText!.innerText = originalText;
-            }, 3000);
-          }
-        } catch (error) {
-          uploadText!.innerText = "Error uploading file";
-          console.error("Error:", error);
-          setTimeout(() => {
-            uploadText!.innerText = originalText;
-          }, 3000);
-        }
-      }
-    }
-  </script>
+  <script src="../../scripts/uploadZone.ts"></script>
 </div>
 
 <style>
