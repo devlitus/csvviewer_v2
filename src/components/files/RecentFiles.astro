@@ -1,152 +1,154 @@
 ---
-import FileCard from "./FileCard.astro";
 
-interface FileData {
-  id: string;
-  filename: string;
-  originalFilename?: string;
-  size: string;
-  date: string;
-  status: "processed" | "mapping_needed";
-  icon: string;
-  iconColor?: string;
-}
-
-interface Props {
-  files?: FileData[];
-}
-
-const { files: propFiles } = Astro.props as Props;
-
-import fs from "node:fs";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
-
-const FILES_DIR = path.join(process.cwd(), "files");
-
-// Helper for formatting file size
-function formatSize(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-}
-
-// Helper for relative time (simplified)
-function getRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return "Just now";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
-  if (diffInSeconds < 86400)
-    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 172800) return "Yesterday";
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-// Helper to truncate filename
-function truncateFilename(filename: string, maxLength: number = 12): string {
-  if (filename.length <= maxLength) return filename;
-  const ext = path.extname(filename);
-  const name = path.basename(filename, ext);
-  // Reserve space for extension and ellipsis if needed, but per requirement "max 12 chars",
-  // I'll strictly truncate the visual representation.
-  // Strategy: name(max 12) including '...'
-
-  if (filename.length <= 12) return filename;
-  return filename.substring(0, 9) + "...";
-}
-
-const icons = ["table_view", "description", "analytics", "dataset", "grid_on"];
-const iconColors = [
-  "#22C55E",
-  "#007AFF",
-  "#A855F7",
-  "#F59E0B",
-  "#EF4444",
-  "#EC4899",
-];
-
-let files: FileData[] = [];
-
-if (propFiles) {
-  files = propFiles;
-} else {
-  try {
-    if (!fs.existsSync(FILES_DIR)) {
-      fs.mkdirSync(FILES_DIR, { recursive: true });
-    }
-
-    const dirFiles = fs.readdirSync(FILES_DIR);
-
-    const fileStats = dirFiles
-      .filter((file) => !file.startsWith("."))
-      .map((filename) => ({
-        filename,
-        stats: fs.statSync(path.join(FILES_DIR, filename)),
-      }))
-      .sort((a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime());
-
-    files = fileStats.map((item) => ({
-      id: randomUUID(),
-      filename: truncateFilename(item.filename),
-      originalFilename: item.filename, // Keep original for link
-      size: formatSize(item.stats.size),
-      date: getRelativeTime(item.stats.mtime),
-      status: "processed",
-      icon: icons[Math.floor(Math.random() * icons.length)],
-      iconColor: iconColors[Math.floor(Math.random() * iconColors.length)],
-    }));
-  } catch (error) {
-    console.error("Error reading files:", error);
-    files = [];
-  }
-}
 ---
 
 <section class="flex flex-col gap-4">
-  <!-- Header -->
-  <div class="flex items-center justify-between">
-    <h2 class="text-xl font-bold text-text-off-white tracking-tight">
-      Recent Files
-    </h2>
-    <button
-      class="text-sm font-medium text-vibrant-blue hover:text-primary-hover flex items-center gap-1 transition-colors"
-    >
-      View all
-      <span class="material-symbols-outlined" style="font-size: 16px;"
-        >arrow_forward</span
-      >
-    </button>
-  </div>
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-text-off-white tracking-tight">
+            Recent Files
+        </h2>
+        <a
+            href="/files"
+            class="text-sm font-medium text-vibrant-blue hover:text-primary-hover flex items-center gap-1 transition-colors"
+        >
+            View all
+            <span class="material-symbols-outlined" style="font-size: 16px;"
+                >arrow_forward</span
+            >
+        </a>
+    </div>
 
-  <!-- Files Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    {
-      files.map((file) => (
-        <FileCard
-          filename={file.filename}
-          fullFilename={file.originalFilename || file.filename}
-          size={file.size}
-          date={file.date}
-          status={file.status}
-          icon={file.icon}
-          iconColor={file.iconColor}
-        />
-      ))
-    }
-  </div>
+    <!-- Files Grid -->
+    <div
+        id="recent-files-grid"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+    >
+        <!-- Rendered by client script -->
+    </div>
 </section>
 
+<script>
+    import { getAllFiles } from "../../lib/indexeddb";
+    import type { CSVFile } from "../../lib/types";
+
+    const icons = [
+        "table_view",
+        "description",
+        "analytics",
+        "dataset",
+        "grid_on",
+    ];
+    const colorSchemes: Record<string, { bgClass: string; textClass: string }> =
+        {
+            table_view: {
+                bgClass: "bg-green-500/10",
+                textClass: "text-green-400",
+            },
+            description: {
+                bgClass: "bg-vibrant-blue/10",
+                textClass: "text-vibrant-blue",
+            },
+            analytics: {
+                bgClass: "bg-purple-500/10",
+                textClass: "text-purple-400",
+            },
+            dataset: {
+                bgClass: "bg-amber-500/10",
+                textClass: "text-amber-400",
+            },
+            grid_on: { bgClass: "bg-red-500/10", textClass: "text-red-400" },
+        };
+
+    function formatSize(bytes: number): string {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+    }
+
+    function getRelativeTime(timestamp: number): string {
+        const diffInSeconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (diffInSeconds < 60) return "Just now";
+        if (diffInSeconds < 3600)
+            return `${Math.floor(diffInSeconds / 60)} mins ago`;
+        if (diffInSeconds < 86400)
+            return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+        if (diffInSeconds < 172800) return "Yesterday";
+        return new Date(timestamp).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+    }
+
+    function truncateFilename(filename: string): string {
+        if (filename.length <= 12) return filename;
+        return filename.substring(0, 9) + "...";
+    }
+
+    function seededRandom(seed: string): number {
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+            hash = (hash << 5) - hash + seed.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+
+    function renderCard(file: CSVFile): string {
+        const seed = seededRandom(file.id);
+        const icon = icons[seed % icons.length];
+        const scheme = colorSchemes[icon] || colorSchemes["description"];
+        const displayName = truncateFilename(file.filename);
+
+        return `<a href="/visualizer?file=${file.id}"
+      class="block group relative flex flex-col p-4 bg-surface-card border border-border-dark rounded-xl hover:shadow-2xl hover:border-vibrant-blue/30 transition-all duration-300 cursor-pointer text-left decoration-transparent">
+      <div class="flex items-start justify-between mb-3">
+        <div class="p-2 ${scheme.bgClass} ${scheme.textClass} rounded-lg flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined w-6 h-6" style="font-size: 24px;">${icon}</span>
+        </div>
+        <button class="text-text-light-gray hover:text-text-off-white p-1 rounded-md hover:bg-white/5 transition-colors" onclick="event.preventDefault();">
+          <span class="material-symbols-outlined w-5 h-5" style="font-size: 20px;">more_vert</span>
+        </button>
+      </div>
+      <h3 class="text-base font-bold text-text-off-white mb-1 group-hover:text-vibrant-blue transition-colors truncate">${displayName}</h3>
+      <div class="flex items-center gap-2 text-xs text-text-light-gray mb-4">
+        <span>${formatSize(file.size)}</span>
+        <span class="w-1 h-1 bg-current rounded-full opacity-50"></span>
+        <span>${getRelativeTime(file.uploadDate)}</span>
+      </div>
+      <div class="mt-auto pt-3 border-t border-border-dark/50 flex items-center justify-between">
+        <span class="text-xs font-medium text-green-400 flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+          Processed
+        </span>
+        <span class="text-xs font-medium text-vibrant-blue opacity-0 group-hover:opacity-100 transition-opacity">Open File</span>
+      </div>
+    </a>`;
+    }
+
+    async function loadRecentFiles() {
+        const grid = document.getElementById("recent-files-grid");
+        if (!grid) return;
+
+        const files = await getAllFiles();
+        const recent = files.slice(0, 6);
+
+        if (recent.length === 0) {
+            grid.innerHTML = `<p class="text-text-light-gray text-sm col-span-3">No files uploaded yet. Upload a CSV to get started.</p>`;
+        } else {
+            grid.innerHTML = recent.map(renderCard).join("");
+        }
+    }
+
+    loadRecentFiles();
+</script>
+
 <style>
-  :root {
-    --color-primary: #007aff;
-    --color-primary-hover: #0062cc;
-  }
+    :root {
+        --color-primary: #007aff;
+        --color-primary-hover: #0062cc;
+    }
 </style>

@@ -13,6 +13,7 @@ const { currentPage = "upload" } = Astro.props as Props;
 
 <aside
   id="main-sidebar"
+  transition:persist
   class="fixed inset-y-0 left-0 z-50 w-64 bg-background-dark border-r border-border-dark flex flex-col h-full transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex"
 >
   <!-- Logo -->
@@ -42,6 +43,7 @@ const { currentPage = "upload" } = Astro.props as Props;
 <!-- Overlay for mobile -->
 <div
   id="sidebar-overlay"
+  transition:persist
   class="fixed inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"
 >
 </div>
@@ -70,6 +72,32 @@ const { currentPage = "upload" } = Astro.props as Props;
       overlay?.classList.remove("opacity-0");
     }, 10);
   });
+
+  // Update active nav item on SPA navigation
+  function updateActiveNav() {
+    const path = window.location.pathname;
+    document.querySelectorAll("a[data-nav-href]").forEach((link) => {
+      const href = link.getAttribute("data-nav-href")!;
+      const isActive = href === "/" ? path === "/" : path.startsWith(href);
+      const icon = link.querySelector(".material-symbols-outlined");
+
+      if (isActive) {
+        link.className = link.className
+          .replace(/text-text-light-gray hover:bg-white\/5 hover:text-text-off-white transition-colors/g, "")
+          .replace(/bg-vibrant-blue\/10 text-vibrant-blue font-semibold/g, "")
+          + " bg-vibrant-blue/10 text-vibrant-blue font-semibold";
+        icon?.classList.add("filled");
+      } else {
+        link.className = link.className
+          .replace(/bg-vibrant-blue\/10 text-vibrant-blue font-semibold/g, "")
+          .replace(/text-text-light-gray hover:bg-white\/5 hover:text-text-off-white transition-colors/g, "")
+          + " text-text-light-gray hover:bg-white/5 hover:text-text-off-white transition-colors";
+        icon?.classList.remove("filled");
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", updateActiveNav);
 </script>
 
 <style>
