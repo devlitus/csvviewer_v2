@@ -10,7 +10,8 @@
       "Bash(pnpm dev)",
       "Bash(pnpm astro check:*)",
       "Bash(dir:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(if not exist \"D:\\\\work\\\\csvviewer_v2\\\\docs\" mkdir \"D:\\\\work\\\\csvviewer_v2\\\\docs\")"
     ]
   }
 }

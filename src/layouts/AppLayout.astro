@@ -6,9 +6,10 @@ import PageHeader from "../components/layout/PageHeader.astro";
 interface Props {
   title: string;
   showSearch?: boolean;
+  contentClass?: string;
 }
 
-const { title, showSearch = true } = Astro.props as Props;
+const { title, showSearch = true, contentClass = "flex-1 overflow-y-auto px-8 py-8" } = Astro.props as Props;
 ---
 
 <Layout>
@@ -18,7 +19,7 @@ const { title, showSearch = true } = Astro.props as Props;
       class="flex-1 flex flex-col h-full bg-surface-dark overflow-hidden relative rounded-tl-2xl shadow-2xl border-l border-border-dark my-2 mr-2"
     >
       <PageHeader {title} {showSearch} />
-      <div class="flex-1 overflow-y-auto px-8 py-8">
+      <div class={contentClass}>
         <slot />
       </div>
     </main>
