@@ -1,7 +1,21 @@
 ---
-
+import AppLayout from "../layouts/AppLayout.astro";
+import UploadZone from "../components/upload/UploadZone.astro";
+import RecentFilesSection from "../components/files/RecentFilesSection.astro";
 ---
 
-<main>
-  <h1>Welcome to CSV Viewer</h1>
-</main>
+<AppLayout title="Upload">
+  <div class="max-w-[1000px] mx-auto flex flex-col gap-8">
+    <!-- Titulo -->
+    <div class="flex flex-col gap-2">
+      <h1 class="text-3xl font-bold text-text-off-white">Upload & Process</h1>
+      <p class="text-text-light-gray">Get started by importing your data...</p>
+    </div>
+
+    <!-- Zona upload -->
+    <UploadZone />
+
+    <!-- Archivos recientes -->
+    <RecentFilesSection />
+  </div>
+</AppLayout>

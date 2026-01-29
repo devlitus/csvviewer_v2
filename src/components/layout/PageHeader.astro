@@ -1,0 +1,32 @@
+---
+interface Props {
+  title: string;
+  showSearch?: boolean;
+}
+
+const { title, showSearch = true } = Astro.props as Props;
+---
+
+<header class="flex items-center justify-between px-8 py-6 border-b border-border-dark">
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-text-light-gray">
+    <span class="material-symbols-outlined text-xl">home</span>
+    <span>/</span>
+    <span class="text-text-off-white font-medium">{title}</span>
+  </div>
+
+  <!-- Search bar -->
+  {
+    showSearch && (
+      <div class="flex items-center gap-2 bg-surface-card rounded-lg px-4 py-2 border border-border-dark">
+        <span class="material-symbols-outlined text-text-light-gray">search</span>
+        <input
+          type="text"
+          placeholder="Search files..."
+          class="bg-transparent text-text-off-white placeholder-text-light-gray outline-none w-48 opacity-60 cursor-not-allowed"
+          disabled
+        />
+      </div>
+    )
+  }
+</header>

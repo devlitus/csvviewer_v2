@@ -1,0 +1,50 @@
+---
+interface Props {
+  filename: string;
+  size: string;
+  date: string;
+  icon: string;
+  iconColorClass: string;
+  status: string;
+  statusColorClass: string;
+  statusIcon: string;
+  actionLabel?: string;
+}
+
+const { filename, size, date, icon, iconColorClass, status, statusColorClass, statusIcon, actionLabel = "Open File" } = Astro.props as Props;
+---
+
+<div class="bg-surface-card border border-border-dark rounded-xl p-4 hover:border-vibrant-blue transition-all duration-300 group cursor-pointer">
+  <!-- Header con icono y menu -->
+  <div class="flex items-start justify-between mb-3">
+    <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${iconColorClass}`}>
+      <span class="material-symbols-outlined text-lg">{icon}</span>
+    </div>
+    <button class="p-1 rounded-lg hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100">
+      <span class="material-symbols-outlined text-text-light-gray text-lg">more_vert</span>
+    </button>
+  </div>
+
+  <!-- Nombre del archivo -->
+  <h3 class="font-semibold text-text-off-white mb-2 group-hover:text-vibrant-blue transition-colors line-clamp-1">
+    {filename}
+  </h3>
+
+  <!-- Tamaño y fecha -->
+  <p class="text-xs text-text-light-gray mb-4">
+    {size} · {date}
+  </p>
+
+  <!-- Footer con estado y acción -->
+  <div class="flex items-center justify-between pt-3 border-t border-border-dark">
+    <div class="flex items-center gap-1">
+      <span class={`material-symbols-outlined text-sm ${statusColorClass}`}>
+        {statusIcon}
+      </span>
+      <span class={`text-xs font-medium ${statusColorClass}`}>{status}</span>
+    </div>
+    <span class="text-xs text-vibrant-blue font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+      {actionLabel}
+    </span>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+---
+import NavItem from "../navigation/NavItem.astro";
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props as Props;
+
+const navItems = [
+  { href: "/", icon: "upload", label: "Upload", filled: false },
+  { href: "/files", icon: "folder", label: "My Files", filled: false },
+  { href: "/visualizer", icon: "bar_chart", label: "Visualizer", filled: false },
+  { href: "/settings", icon: "settings", label: "Settings", filled: false },
+];
+
+const isActive = (href: string): boolean => {
+  if (href === "/") {
+    return currentPath === "/" || currentPath === "";
+  }
+  return currentPath.startsWith(href);
+};
+---
+
+<aside class="w-64 bg-background-dark border-r border-border-dark flex flex-col h-screen p-6">
+  <!-- Logo -->
+  <div class="flex items-center gap-3 mb-8">
+    <div class="w-10 h-10 bg-vibrant-blue rounded-lg flex items-center justify-center">
+      <span class="material-symbols-outlined text-white text-xl">view_kanban</span>
+    </div>
+    <div>
+      <div class="font-bold text-text-off-white">DataFlow</div>
+      <div class="text-xs text-text-light-gray">Processor v2.0</div>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="flex-1 space-y-2 overflow-y-auto">
+    {
+      navItems.map((item) => (
+        <NavItem
+          href={item.href}
+          icon={item.icon}
+          label={item.label}
+          active={isActive(item.href)}
+          filled={isActive(item.href)}
+        />
+      ))
+    }
+  </nav>
+
+  <!-- Botón New Project -->
+  <button
+    disabled
+    class="w-full mb-6 px-4 py-2.5 bg-vibrant-blue hover:bg-primary text-white font-semibold rounded-lg transition-colors opacity-50 cursor-not-allowed"
+  >
+    + New Project
+  </button>
+
+  <!-- Perfil de usuario -->
+  <div class="border-t border-border-dark pt-6 space-y-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-vibrant-blue/20 rounded-full flex items-center justify-center">
+        <span class="material-symbols-outlined text-vibrant-blue">account_circle</span>
+      </div>
+      <div>
+        <div class="text-sm font-semibold text-text-off-white">Alex Morgan</div>
+        <div class="text-xs text-text-light-gray">alex@example.com</div>
+      </div>
+    </div>
+  </div>
+</aside>
