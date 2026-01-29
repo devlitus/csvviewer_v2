@@ -1,38 +1,4 @@
 ---
-import RecentFileCard from "./RecentFileCard.astro";
-
-const recentFiles = [
-  {
-    filename: "sales_data_q3.csv",
-    size: "2.4MB",
-    date: "2 hours ago",
-    icon: "table_view",
-    iconColorClass: "bg-green-500/10 text-green-400",
-    status: "Processed",
-    statusColorClass: "text-green-400",
-    statusIcon: "check_circle",
-  },
-  {
-    filename: "inventory_list.csv",
-    size: "840KB",
-    date: "Yesterday",
-    icon: "inventory_2",
-    iconColorClass: "bg-green-500/10 text-green-400",
-    status: "Processed",
-    statusColorClass: "text-green-400",
-    statusIcon: "check_circle",
-  },
-  {
-    filename: "client_contacts.csv",
-    size: "1.2MB",
-    date: "Oct 24, 2023",
-    icon: "contacts",
-    iconColorClass: "bg-orange-500/10 text-orange-400",
-    status: "Mapping Needed",
-    statusColorClass: "text-orange-400",
-    statusIcon: "warning",
-  },
-];
 ---
 
 <section class="space-y-4">
@@ -45,18 +11,19 @@ const recentFiles = [
   </div>
 
   <!-- Grid de tarjetas -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    {recentFiles.map((file) => (
-      <RecentFileCard
-        filename={file.filename}
-        size={file.size}
-        date={file.date}
-        icon={file.icon}
-        iconColorClass={file.iconColorClass}
-        status={file.status}
-        statusColorClass={file.statusColorClass}
-        statusIcon={file.statusIcon}
-      />
-    ))}
+  <div data-recent-files-grid aria-live="polite" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Estado vacío (se oculta cuando hay archivos) -->
+    <div
+      data-empty-state
+      class="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center"
+    >
+      <div class="flex justify-center mb-4">
+        <div class="w-12 h-12 bg-border-dark rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-text-light-gray">folder_open</span>
+        </div>
+      </div>
+      <p class="text-text-light-gray">No files uploaded yet</p>
+      <p class="text-xs text-text-light-gray mt-1">Start by uploading a CSV file above</p>
+    </div>
   </div>
 </section>

@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "commit": "bash scripts/commit.sh"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.2",

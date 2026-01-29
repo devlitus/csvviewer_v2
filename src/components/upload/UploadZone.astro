@@ -2,46 +2,61 @@
 ---
 
 <label
+  data-upload-zone
   class="block relative border-2 border-dashed border-border-dark rounded-2xl p-8 h-72 flex flex-col items-center justify-center cursor-pointer hover:border-vibrant-blue hover:bg-accent-glow transition-all duration-300 group"
 >
-  <!-- Icono cloud upload -->
-  <div
-    class="w-16 h-16 bg-vibrant-blue/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
-  >
-    <span class="material-symbols-outlined text-vibrant-blue text-5xl">cloud_upload</span>
-  </div>
-
-  <!-- Textos principales -->
-  <div class="text-center mb-4">
-    <h3 class="text-xl font-semibold text-text-off-white mb-1">
-      Drag & drop your CSV here
-    </h3>
-    <p class="text-text-light-gray">
-      or click to browse from your computer
-    </p>
-  </div>
-
-  <!-- Badges -->
-  <div class="flex gap-4 mb-6 flex-wrap justify-center">
-    <div class="px-3 py-1 bg-surface-card rounded-full text-xs text-text-light-gray border border-border-dark">
-      Supports: .csv
+  <!-- Contenido principal (se reemplaza durante loading) -->
+  <div data-upload-content class="flex flex-col items-center justify-center w-full">
+    <!-- Icono cloud upload -->
+    <div
+      class="w-16 h-16 bg-vibrant-blue/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
+    >
+      <span class="material-symbols-outlined text-vibrant-blue text-5xl">cloud_upload</span>
     </div>
-    <div class="px-3 py-1 bg-surface-card rounded-full text-xs text-text-light-gray border border-border-dark">
-      Max 50MB
-    </div>
-  </div>
 
-  <!-- Botón Browse -->
-  <button
-    type="button"
-    class="px-6 py-2.5 bg-vibrant-blue hover:bg-primary text-white font-semibold rounded-lg transition-colors"
-  >
-    Browse Files
-  </button>
+    <!-- Textos principales -->
+    <div class="text-center mb-4">
+      <h3 class="text-xl font-semibold text-text-off-white mb-1">
+        Drag & drop your CSV here
+      </h3>
+      <p class="text-text-light-gray">
+        or click to browse from your computer
+      </p>
+    </div>
+
+    <!-- Badges -->
+    <div class="flex gap-4 mb-6 flex-wrap justify-center">
+      <div class="px-3 py-1 bg-surface-card rounded-full text-xs text-text-light-gray border border-border-dark">
+        Supports: .csv
+      </div>
+      <div class="px-3 py-1 bg-surface-card rounded-full text-xs text-text-light-gray border border-border-dark">
+        Max 10MB
+      </div>
+    </div>
+
+    <!-- Botón Browse -->
+    <button
+      type="button"
+      class="px-6 py-2.5 bg-vibrant-blue hover:bg-primary text-white font-semibold rounded-lg transition-colors"
+    >
+      Browse Files
+    </button>
+  </div>
 
   <!-- Input hidden para estructura -->
-  <input id="file-upload" type="file" multiple accept=".csv" class="hidden" />
+  <input id="file-upload-input" type="file" accept=".csv" class="hidden" />
 </label>
+
+<!-- Mensaje de error -->
+<div
+  data-upload-error
+  role="alert"
+  aria-live="assertive"
+  class="hidden mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2 transition-all duration-300"
+>
+  <span class="material-symbols-outlined text-base">error</span>
+  <span data-error-message></span>
+</div>
 
 <style>
   label {
@@ -50,5 +65,31 @@
 
   label:hover {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  }
+
+  label.drag-over {
+    border-color: rgb(59, 130, 246);
+    border-style: solid;
+    background-color: rgb(59, 130, 246, 0.05);
+  }
+
+  label.drag-over [data-upload-content] > div:first-child {
+    @apply scale-125;
+  }
+
+  label.loading {
+    pointer-events: none;
+    border-color: rgb(59, 130, 246);
+    border-style: solid;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 </style>
