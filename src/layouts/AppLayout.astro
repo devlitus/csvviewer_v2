@@ -1,0 +1,27 @@
+---
+import Layout from "./Layout.astro";
+import Sidebar from "../components/layout/Sidebar.astro";
+import PageHeader from "../components/layout/PageHeader.astro";
+
+interface Props {
+  title: string;
+  showSearch?: boolean;
+  contentClass?: string;
+}
+
+const { title, showSearch = true, contentClass = "flex-1 overflow-y-auto px-8 py-8" } = Astro.props as Props;
+---
+
+<Layout>
+  <div class="flex h-screen w-full overflow-hidden">
+    <Sidebar currentPath={Astro.url.pathname} />
+    <main
+      class="flex-1 flex flex-col h-full bg-surface-dark overflow-hidden relative rounded-tl-2xl shadow-2xl border-l border-border-dark my-2 mr-2"
+    >
+      <PageHeader {title} {showSearch} />
+      <div class={contentClass}>
+        <slot />
+      </div>
+    </main>
+  </div>
+</Layout>

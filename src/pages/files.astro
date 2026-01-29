@@ -1,0 +1,72 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+import FileTable from "../components/files/FileTable.astro";
+
+const files = [
+  {
+    filename: "sales_data_q3.csv",
+    date: "2 hours ago",
+    size: "2.4 MB",
+    status: "processed" as const,
+    icon: "table_view",
+    iconColor: "green" as const,
+  },
+  {
+    filename: "inventory_list_2023.xlsx",
+    date: "Yesterday, 4:20 PM",
+    size: "840 KB",
+    status: "processed" as const,
+    icon: "inventory_2",
+    iconColor: "blue" as const,
+  },
+  {
+    filename: "client_contacts.csv",
+    date: "Oct 24, 2023",
+    size: "1.2 MB",
+    status: "mapping-needed" as const,
+    icon: "contacts",
+    iconColor: "purple" as const,
+  },
+  {
+    filename: "monthly_report_v2.csv",
+    date: "Oct 22, 2023",
+    size: "4.5 MB",
+    status: "error" as const,
+    icon: "error",
+    iconColor: "red" as const,
+  },
+  {
+    filename: "archived_marketing_leads.csv",
+    date: "Sep 15, 2023",
+    size: "12.1 MB",
+    status: "processed" as const,
+    icon: "analytics",
+    iconColor: "gray" as const,
+  },
+  {
+    filename: "customer_feedback_survey.csv",
+    date: "Sep 08, 2023",
+    size: "3.1 MB",
+    status: "processed" as const,
+    icon: "dataset",
+    iconColor: "blue" as const,
+  },
+];
+---
+
+<AppLayout title="My Files" contentClass="flex-1 overflow-hidden flex flex-col px-8 pt-8">
+  <!-- Header section with title and button -->
+  <div class="flex-shrink-0 flex items-end justify-between mb-8">
+    <div class="flex flex-col gap-1">
+      <h1 class="text-3xl font-black text-text-off-white tracking-tight">My Files</h1>
+      <p class="text-sm text-text-light-gray">Manage and organize your processed data sets.</p>
+    </div>
+    <button class="bg-vibrant-blue hover:bg-primary-hover text-white text-sm font-bold h-10 px-6 rounded-lg shadow-md flex items-center gap-2 transition-all">
+      <span class="material-symbols-outlined" style="font-size: 20px;">upload</span>
+      Upload New
+    </button>
+  </div>
+
+  <!-- File table -->
+  <FileTable {files} />
+</AppLayout>

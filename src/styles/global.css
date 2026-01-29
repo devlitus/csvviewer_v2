@@ -1,70 +1,43 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-
+/* Fonts loaded from Google Fonts CDN in Layout.astro (Inter and Material Symbols) */
 @import "tailwindcss";
 
 @theme {
-  /* Colores principales */
   --color-primary: #007AFF;
   --color-primary-hover: #0062CC;
   --color-vibrant-blue: #3B82F6;
-
-  /* Fondos */
   --color-background-dark: #121212;
   --color-surface-dark: #1A1C1E;
   --color-surface-card: #24272B;
-
-  /* Textos */
   --color-text-off-white: #F5F5F7;
   --color-text-light-gray: #A1A1AA;
-
-  /* Bordes */
   --color-border-dark: #2D2F36;
-
-  /* Acentos */
   --color-accent-glow: rgba(0, 122, 255, 0.15);
-
-  /* New Colors from Design */
-  --color-primary-hover: #0062CC;
-  --color-vibrant-blue: #3B82F6;
-  --color-surface-card: #24272B;
-
-  /* Status colors */
-  --color-status-success: #22C55E;
-  --color-status-warning: #F97316;
-  --color-status-info: #A855F7;
-
-  /* Tipografía */
-  --font-display: "Inter", sans-serif;
-  --font-body: "Inter", sans-serif;
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
+@layer base {
+  html {
+    font-family: "Inter", system-ui, sans-serif;
+  }
 
-/* Estilos base personalizados */
-html {
-  scroll-behavior: smooth;
-}
+  body {
+    @apply bg-background-dark text-text-off-white antialiased;
+  }
 
-body {
-  @apply bg-background-dark text-text-off-white font-body;
-}
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 
-/* Scrollbar personalizado */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-dark;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--color-surface-dark);
-}
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-dark rounded-full;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-dark);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-light-gray);
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-light-gray;
+  }
 }

@@ -1,0 +1,49 @@
+---
+import FileIcon from "./FileIcon.astro";
+import StatusBadge from "./StatusBadge.astro";
+
+interface Props {
+  filename: string;
+  date: string;
+  size: string;
+  status: "processed" | "mapping-needed" | "error";
+  icon: string;
+  iconColor: "green" | "blue" | "purple" | "red" | "gray";
+}
+
+const { filename, date, size, status, icon, iconColor } = Astro.props as Props;
+---
+
+<tr class="hover:bg-white/5 transition-colors cursor-pointer group">
+  <!-- File Name with Icon -->
+  <td class="px-6 py-4">
+    <div class="flex items-center gap-3">
+      <FileIcon icon={icon} color={iconColor} />
+      <span class="text-sm font-semibold text-text-off-white group-hover:text-vibrant-blue transition-colors truncate">
+        {filename}
+      </span>
+    </div>
+  </td>
+
+  <!-- Date Uploaded -->
+  <td class="px-6 py-4 text-sm text-text-light-gray">
+    {date}
+  </td>
+
+  <!-- File Size -->
+  <td class="px-6 py-4 text-sm text-text-light-gray">
+    {size}
+  </td>
+
+  <!-- Status -->
+  <td class="px-6 py-4">
+    <StatusBadge status={status} />
+  </td>
+
+  <!-- Actions -->
+  <td class="px-6 py-4 text-right">
+    <button class="p-1 rounded-lg hover:bg-white/5 transition-colors">
+      <span class="material-symbols-outlined text-text-light-gray text-xl">more_vert</span>
+    </button>
+  </td>
+</tr>

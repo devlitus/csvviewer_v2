@@ -1,0 +1,29 @@
+---
+---
+
+<section class="space-y-4">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-text-off-white">Recent Files</h2>
+    <a href="/files" class="text-vibrant-blue hover:text-primary text-sm font-medium transition-colors">
+      View all →
+    </a>
+  </div>
+
+  <!-- Grid de tarjetas -->
+  <div data-recent-files-grid aria-live="polite" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Estado vacío (se oculta cuando hay archivos) -->
+    <div
+      data-empty-state
+      class="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center"
+    >
+      <div class="flex justify-center mb-4">
+        <div class="w-12 h-12 bg-border-dark rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-text-light-gray">folder_open</span>
+        </div>
+      </div>
+      <p class="text-text-light-gray">No files uploaded yet</p>
+      <p class="text-xs text-text-light-gray mt-1">Start by uploading a CSV file above</p>
+    </div>
+  </div>
+</section>
