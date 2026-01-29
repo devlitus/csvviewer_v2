@@ -11,6 +11,10 @@
  * Execute callback when page loads, compatible with Astro View Transitions
  * Fires on initial page load AND after each SPA navigation
  *
+ * This function uses dual listeners for maximum compatibility:
+ * - astro:page-load: Fires on both initial load and View Transitions navigation (preferred)
+ * - DOMContentLoaded: Fallback for environments without View Transitions or initial load
+ *
  * @param callback - Function to execute when page loads
  * @example
  * onPageLoad(() => {
@@ -21,9 +25,11 @@
  */
 export function onPageLoad(callback: () => void): void {
   // Use astro:page-load instead of DOMContentLoaded for View Transitions compatibility
+  // This fires on both initial page load and after each SPA navigation
   document.addEventListener('astro:page-load', callback);
 
   // Also support standard page load for non-View Transitions navigation
+  // This ensures initialization works in environments without View Transitions
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', callback);
   } else {

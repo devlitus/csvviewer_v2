@@ -16,8 +16,9 @@ const ERROR_AUTO_HIDE_DELAY = 5000; // 5 seconds
 let IDLE_STATE_HTML: string = "";
 
 // Track event listeners for cleanup
-let uploadZoneListeners: { element: HTMLElement; listeners: Array<[string, EventListener]> } | null = null;
-let fileInputListener: EventListener | null = null;
+let dragDropListeners: { element: HTMLElement; listeners: Array<[string, EventListener]> } | null = null;
+let fileChangeListener: EventListener | null = null;
+let browseButtonListener: { element: HTMLElement; listener: EventListener } | null = null;
 
 interface ErrorScenario {
   condition: (file: File) => boolean;
@@ -91,7 +92,7 @@ function renderFileCard(file: CSVFile): string {
   const escapedDate = escapeHtml(date);
 
   const cardElement = `
-    <div data-file-card class="bg-surface-card border border-border-dark rounded-xl p-4 hover:border-vibrant-blue transition-all duration-300 group cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300" data-file-id="${file.id}">
+    <div data-file-card class="bg-surface-card border border-border-dark rounded-xl p-4 hover:border-vibrant-blue transition-all duration-300 group cursor-pointer animate-in fade-in slide-in-from-bottom-2" data-file-id="${escapeHtml(file.id)}">
       <div class="flex items-start justify-between mb-3">
         <div class="${iconColorClass} w-10 h-10 rounded-lg flex items-center justify-center">
           <span class="material-symbols-outlined text-lg">table_view</span>
@@ -179,17 +180,17 @@ async function showLoadingState(): Promise<void> {
   uploadContent.innerHTML = spinnerHTML;
 }
 
-function setupBrowseButton(fileInput: HTMLInputElement): void {
-  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR);
-  if (!uploadZone) return;
-
+function setupBrowseButton(uploadZone: HTMLElement, fileInput: HTMLInputElement): void {
   const browseButton = uploadZone.querySelector('button[type="button"]') as HTMLButtonElement;
-  if (browseButton) {
-    browseButton.addEventListener('click', (e: Event) => {
-      e.preventDefault();
-      fileInput.click();
-    });
-  }
+  if (!browseButton) return;
+
+  const clickHandler = (e: Event) => {
+    e.preventDefault();
+    fileInput.click();
+  };
+
+  browseButton.addEventListener('click', clickHandler);
+  browseButtonListener = { element: browseButton, listener: clickHandler };
 }
 
 async function restoreIdleState(): Promise<void> {
@@ -348,21 +349,27 @@ async function processFile(file: File): Promise<void> {
 
 function cleanupUploadZone(): void {
   // Remove previously attached listeners to prevent duplicates
-  if (uploadZoneListeners) {
-    const { element, listeners } = uploadZoneListeners;
+  if (dragDropListeners) {
+    const { element, listeners } = dragDropListeners;
     listeners.forEach(([event, handler]) => {
       element.removeEventListener(event, handler);
     });
   }
-  uploadZoneListeners = null;
+  dragDropListeners = null;
 
-  if (fileInputListener) {
+  if (fileChangeListener) {
     const fileInput = document.querySelector(FILE_INPUT_SELECTOR) as HTMLInputElement;
     if (fileInput) {
-      fileInput.removeEventListener('change', fileInputListener);
+      fileInput.removeEventListener('change', fileChangeListener);
     }
   }
-  fileInputListener = null;
+  fileChangeListener = null;
+
+  if (browseButtonListener) {
+    const { element, listener } = browseButtonListener;
+    element.removeEventListener('click', listener);
+  }
+  browseButtonListener = null;
 }
 
 function initializeUploadZone(): void {
@@ -374,8 +381,8 @@ function initializeUploadZone(): void {
   // Clean up any existing listeners
   cleanupUploadZone();
 
-  // Setup Browse Files button
-  setupBrowseButton(fileInput);
+  // Setup Browse Files button (tracked for cleanup)
+  setupBrowseButton(uploadZone, fileInput);
 
   // Track handlers for cleanup
   const handlers: Array<[string, EventListener]> = [];
@@ -431,7 +438,7 @@ function initializeUploadZone(): void {
   handlers.push(["drop", dropHandler]);
 
   // Store handlers for cleanup on navigation
-  uploadZoneListeners = { element: uploadZone, listeners: handlers };
+  dragDropListeners = { element: uploadZone, listeners: handlers };
 
   // File input change handler
   const changeHandler = async (e: Event) => {
@@ -444,7 +451,7 @@ function initializeUploadZone(): void {
     input.value = "";
   };
   fileInput.addEventListener("change", changeHandler);
-  fileInputListener = changeHandler;
+  fileChangeListener = changeHandler;
 }
 
 async function loadRecentFiles(): Promise<void> {
