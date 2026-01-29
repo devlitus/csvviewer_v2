@@ -1,3 +1,6 @@
+import { deleteFiles } from "../lib/indexeddb";
+import { uploadFiles } from "../lib/fileUpload";
+
 // Upload Logic
 const uploadButton = document.getElementById("uploadButton");
 const fileInput = document.getElementById("fileInput") as HTMLInputElement;
@@ -11,32 +14,33 @@ if (uploadButton && fileInput) {
     const files = fileInput.files;
     if (!files || files.length === 0) return;
 
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("files", files[i]);
-    }
-
     try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const result = await uploadFiles(files);
 
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        const result = await response.json();
-        alert("Upload failed: " + (result.message || "Unknown error"));
+      if (result.uploaded > 0) {
+        // Dispatch custom event - el listener se encarga del reload
+        document.dispatchEvent(
+          new CustomEvent("files-uploaded", {
+            detail: { uploaded: result.uploaded, skipped: result.skipped }
+          })
+        );
+      } else if (result.errors.length > 0) {
+        alert(result.errors.join("\n"));
       }
     } catch (error) {
       console.error("Error uploading files:", error);
       alert("Error uploading files");
     }
 
-    // Reset input value to allow re-uploading same file if needed
     fileInput.value = "";
   });
 }
+
+// Listen for files-uploaded event to refresh the page
+document.addEventListener("files-uploaded", () => {
+  // Reload centralizado - evita race conditions
+  window.location.reload();
+});
 
 // Selection and Delete Logic
 const selectAllCheckbox = document.getElementById(
@@ -74,7 +78,6 @@ fileCheckboxes.forEach((cb) => {
   cb.addEventListener("change", () => {
     updateDeleteButton();
 
-    // Update select all state
     const allChecked = Array.from(fileCheckboxes).every((c) => c.checked);
     const someChecked = Array.from(fileCheckboxes).some((c) => c.checked);
 
@@ -92,20 +95,17 @@ if (deleteButton) {
   deleteButton.addEventListener("click", () => {
     const selectedFiles = Array.from(fileCheckboxes)
       .filter((cb) => cb.checked)
-      .map((cb) => cb.dataset.filename);
+      .map((cb) => cb.dataset.fileId);
 
     if (selectedFiles.length === 0) return;
 
-    // Update description/title if needed based on count
     const descEl = modal?.querySelector("p");
     if (descEl) {
       descEl.textContent = `Are you sure you want to delete ${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""}? This action cannot be undone.`;
     }
 
-    // Show Modal
     if (modal) {
       modal.classList.remove("hidden");
-      // Trigger reflow/next frame for animation
       requestAnimationFrame(() => {
         modal.classList.remove("opacity-0");
         modal
@@ -118,47 +118,25 @@ if (deleteButton) {
     }
   });
 
-  // Handle Confirm Action
   if (confirmBtn) {
     confirmBtn.addEventListener("click", async () => {
-      const selectedFiles = Array.from(fileCheckboxes)
+      const selectedIds = Array.from(fileCheckboxes)
         .filter((cb) => cb.checked)
-        .map((cb) => (cb.dataset as { filename: string }).filename);
+        .map((cb) => cb.dataset.fileId!)
+        .filter(Boolean);
 
       try {
-        // Show loading state on button
-        const originalText = confirmBtn.textContent;
         confirmBtn.textContent = "Deleting...";
         (confirmBtn as HTMLButtonElement).disabled = true;
 
-        const response = await fetch("/api/delete", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filenames: selectedFiles }),
-        });
-
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          const result = await response.json();
-          alert("Delete failed: " + (result.message || "Unknown error"));
-          // Reset button
-          confirmBtn.textContent = originalText;
-          (confirmBtn as HTMLButtonElement).disabled = false;
-          // Close modal
-          modal
-            ?.querySelector(".modal-cancel-btn")
-            ?.dispatchEvent(new Event("click"));
-        }
+        await deleteFiles(selectedIds);
+        window.location.reload();
       } catch (error) {
         console.error("Error deleting files:", error);
         alert("Error deleting files");
-        // Reset button
+        // Restaurar estado del botón en caso de error
         confirmBtn.textContent = "Delete";
         (confirmBtn as HTMLButtonElement).disabled = false;
-        // Close modal
         modal
           ?.querySelector(".modal-cancel-btn")
           ?.dispatchEvent(new Event("click"));
