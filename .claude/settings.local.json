@@ -8,7 +8,9 @@
       "mcp__acp__Write",
       "Bash(pnpm build:*)",
       "Bash(pnpm dev)",
-      "Bash(pnpm astro check:*)"
+      "Bash(pnpm astro check:*)",
+      "Bash(dir:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
