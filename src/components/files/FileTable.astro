@@ -1,52 +1,43 @@
 ---
-import FileTableRow from "./FileTableRow.astro";
 import Pagination from "./Pagination.astro";
-
-interface Props {
-  files: Array<{
-    filename: string;
-    date: string;
-    size: string;
-    status: "processed" | "mapping-needed" | "error";
-    icon: string;
-    iconColor: "green" | "blue" | "purple" | "red" | "gray";
-  }>;
-}
-
-const { files } = Astro.props as Props;
 ---
 
-<div class="flex-1 border border-border-dark/50 rounded-xl bg-background-dark overflow-hidden flex flex-col">
+<div
+  class="flex-1 border border-border-dark/50 rounded-xl bg-background-dark overflow-hidden flex flex-col"
+>
   <!-- Table container with scroll -->
   <div class="flex-1 overflow-y-auto">
     <table class="w-full border-collapse">
       <!-- Table head (sticky) -->
       <thead class="sticky top-0 bg-background-dark">
         <tr class="border-b border-border-dark">
-          <th class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider">File Name</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider">Date Uploaded</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider">File Size</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider">Status</th>
+          <th
+            class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider"
+            >File Name</th
+          >
+          <th
+            class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider"
+            >Date Uploaded</th
+          >
+          <th
+            class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider"
+            >File Size</th
+          >
+          <th
+            class="px-6 py-4 text-left text-xs font-semibold text-text-light-gray uppercase tracking-wider"
+            >Status</th
+          >
           <th class="px-6 py-4 text-right"></th>
         </tr>
       </thead>
 
-      <!-- Table body -->
-      <tbody class="divide-y divide-border-dark/40">
-        {files.map((file) => (
-          <FileTableRow
-            filename={file.filename}
-            date={file.date}
-            size={file.size}
-            status={file.status}
-            icon={file.icon}
-            iconColor={file.iconColor}
-          />
-        ))}
+      <!-- Table body - rendered dynamically via slot -->
+      <tbody data-file-table-body class="divide-y divide-border-dark/40">
+        <slot />
       </tbody>
     </table>
   </div>
 
   <!-- Pagination footer -->
-  <Pagination />
+  <Pagination data-pagination />
 </div>

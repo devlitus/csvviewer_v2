@@ -1,7 +1,7 @@
 ---
 description: Genera un plan de implementación para nuevas features o refactoring de código existente.
 name: Planner
-tools: [read, search, web, agent, todo]
+tools: [read, search, web, agent, todo, edit]
 model: Claude Opus 4.5 (copilot)
 handoffs:
   - label: Implementar Plan
