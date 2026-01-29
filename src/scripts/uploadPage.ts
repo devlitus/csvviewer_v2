@@ -1,6 +1,7 @@
 import type { CSVFile } from "../lib/types";
 import { saveFile, getAllFiles } from "../lib/indexeddb";
 import { parseCSVString } from "../lib/csvParser";
+import { onPageLoad, onBeforeSwap } from "../lib/pageInit";
 
 const UPLOAD_ZONE_SELECTOR = "[data-upload-zone]";
 const FILE_INPUT_SELECTOR = "#file-upload-input";
@@ -13,6 +14,10 @@ const EMPTY_STATE_SELECTOR = "[data-empty-state]";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ERROR_AUTO_HIDE_DELAY = 5000; // 5 seconds
 let IDLE_STATE_HTML: string = "";
+
+// Track event listeners for cleanup
+let uploadZoneListeners: { element: HTMLElement; listeners: Array<[string, EventListener]> } | null = null;
+let fileInputListener: EventListener | null = null;
 
 interface ErrorScenario {
   condition: (file: File) => boolean;
@@ -341,32 +346,63 @@ async function processFile(file: File): Promise<void> {
   }
 }
 
+function cleanupUploadZone(): void {
+  // Remove previously attached listeners to prevent duplicates
+  if (uploadZoneListeners) {
+    const { element, listeners } = uploadZoneListeners;
+    listeners.forEach(([event, handler]) => {
+      element.removeEventListener(event, handler);
+    });
+  }
+  uploadZoneListeners = null;
+
+  if (fileInputListener) {
+    const fileInput = document.querySelector(FILE_INPUT_SELECTOR) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.removeEventListener('change', fileInputListener);
+    }
+  }
+  fileInputListener = null;
+}
+
 function initializeUploadZone(): void {
   const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR);
   const fileInput = document.querySelector(FILE_INPUT_SELECTOR) as HTMLInputElement;
 
   if (!uploadZone || !fileInput) return;
 
+  // Clean up any existing listeners
+  cleanupUploadZone();
+
   // Setup Browse Files button
   setupBrowseButton(fileInput);
 
+  // Track handlers for cleanup
+  const handlers: Array<[string, EventListener]> = [];
+
   // Drag and drop handlers
-  uploadZone.addEventListener("dragenter", (e: Event) => {
+  const dragenterHandler = (e: Event) => {
     e.preventDefault();
     uploadZone.classList.add("drag-over");
-  });
+  };
+  uploadZone.addEventListener("dragenter", dragenterHandler);
+  handlers.push(["dragenter", dragenterHandler]);
 
-  uploadZone.addEventListener("dragover", (e: Event) => {
+  const dragoverHandler = (e: Event) => {
     e.preventDefault();
     uploadZone.classList.add("drag-over");
-  });
+  };
+  uploadZone.addEventListener("dragover", dragoverHandler);
+  handlers.push(["dragover", dragoverHandler]);
 
-  uploadZone.addEventListener("dragleave", (e: Event) => {
+  const dragleaveHandler = (e: Event) => {
     e.preventDefault();
     uploadZone.classList.remove("drag-over");
-  });
+  };
+  uploadZone.addEventListener("dragleave", dragleaveHandler);
+  handlers.push(["dragleave", dragleaveHandler]);
 
-  uploadZone.addEventListener("drop", async (e: Event) => {
+  const dropHandler = async (e: Event) => {
     e.preventDefault();
     uploadZone.classList.remove("drag-over");
 
@@ -390,10 +426,15 @@ function initializeUploadZone(): void {
     if (files.length > 1 && processedCount > 0) {
       showError(`Only the first ${processedCount} CSV file(s) will be processed`);
     }
-  });
+  };
+  uploadZone.addEventListener("drop", dropHandler);
+  handlers.push(["drop", dropHandler]);
+
+  // Store handlers for cleanup on navigation
+  uploadZoneListeners = { element: uploadZone, listeners: handlers };
 
   // File input change handler
-  fileInput.addEventListener("change", async (e: Event) => {
+  const changeHandler = async (e: Event) => {
     const inputEvent = e as Event;
     const input = inputEvent.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -401,7 +442,9 @@ function initializeUploadZone(): void {
     }
     // Reset input so same file can be uploaded again
     input.value = "";
-  });
+  };
+  fileInput.addEventListener("change", changeHandler);
+  fileInputListener = changeHandler;
 }
 
 async function loadRecentFiles(): Promise<void> {
@@ -437,13 +480,19 @@ async function loadRecentFiles(): Promise<void> {
 
 // Initialize when DOM is ready
 function initializeUploadPage(): void {
+  // Reset state on each initialization (important for View Transitions)
+  IDLE_STATE_HTML = "";
   initializeUploadZone();
   loadRecentFiles();
 }
 
-// Wait for DOM to be ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeUploadPage);
-} else {
+// Use View Transitions compatible initialization
+onPageLoad(() => {
   initializeUploadPage();
-}
+});
+
+// Cleanup before page swap to prevent duplicate listeners
+onBeforeSwap(() => {
+  cleanupUploadZone();
+  IDLE_STATE_HTML = "";
+});
