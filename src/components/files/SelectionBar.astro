@@ -1,0 +1,36 @@
+---
+// Selection bar for bulk delete operations
+---
+
+<div
+  data-selection-bar
+  class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-surface-card/95 backdrop-blur-md border border-border-dark rounded-xl shadow-lg shadow-black/30 px-6 py-4 items-center gap-6 max-w-md animate-slide-up"
+  style="display: none;"
+>
+  <!-- Selection indicator -->
+  <div class="flex items-center gap-2 flex-1 min-w-0">
+    <div class="shrink-0 w-2 h-2 bg-vibrant-blue rounded-full"></div>
+    <span class="text-sm text-text-off-white whitespace-nowrap">
+      <span data-selection-count>0 files</span> selected
+    </span>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="flex items-center gap-3 shrink-0">
+    <button
+      data-selection-cancel
+      class="px-4 py-2 rounded-lg border border-border-dark text-text-light-gray hover:bg-white/5 hover:border-text-light-gray hover:text-text-off-white transition-colors text-sm font-medium"
+      aria-label="Deselect all files"
+    >
+      Cancel
+    </button>
+    <button
+      data-selection-delete
+      class="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-colors text-sm font-medium flex items-center gap-2"
+      aria-label="Delete selected files"
+    >
+      <span class="material-symbols-outlined text-lg">delete</span>
+      Delete
+    </button>
+  </div>
+</div>

@@ -3,7 +3,7 @@ description: Generate a structured commit message following Conventional Commits
 name: commit
 agent: agent
 model: Claude Haiku 4.5
-tools: [codeSearch, githubRepo, read, edit]
+tools: ['read', 'edit', 'web/githubRepo', 'github/*']
 ---
 
 # Commit Message Generator for CSV Viewer v2

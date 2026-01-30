@@ -11,7 +11,14 @@
       "Bash(pnpm astro check:*)",
       "Bash(dir:*)",
       "Bash(git commit:*)",
-      "Bash(if not exist \"D:\\\\work\\\\csvviewer_v2\\\\docs\" mkdir \"D:\\\\work\\\\csvviewer_v2\\\\docs\")"
+      "Bash(if not exist \"D:\\\\work\\\\csvviewer_v2\\\\docs\" mkdir \"D:\\\\work\\\\csvviewer_v2\\\\docs\")",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find:*)",
+      "Bash(ls -la \"D:\\\\work\\\\csvviewer_v2\\\\src\\\\scripts\\\\filesPage\"\" | grep -E \"^d \")",
+      "Bash(git add:*)",
+      "Bash(cd:*)"
     ]
   }
 }

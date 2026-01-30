@@ -1,14 +1,26 @@
 /**
- * FilesPage Orchestrator (Fase 6: Integración)
+ * Files Page Orchestrator
  *
- * Central coordinator for all filesPage modules.
- * Manages initialization, state synchronization, and event flow.
+ * Coordinates all modules (core, delete, rendering, events, utils) to implement
+ * the files management page functionality.
  *
  * Architecture:
- * - Core: FileStore, SelectionManager, PaginationManager
- * - Delete: SingleDeleteManager, BatchDeleteManager
- * - Rendering: TableRenderer, PaginationRenderer, SelectionBarRenderer, EmptyStateRenderer
- * - Events: TableEventManager, SelectionEventManager, PaginationEventManager, DeleteEventManager
+ * - Core managers handle state (FileStore, SelectionManager, PaginationManager)
+ * - Delete managers handle elimination logic (SingleDeleteManager, BatchDeleteManager)
+ * - Renderers generate HTML and update DOM
+ * - Event managers handle user interactions with event delegation
+ * - Utils provide formatting, animations, and DOM selectors
+ *
+ * Flow:
+ * 1. initFilesPage() instantiates all managers
+ * 2. loadFiles() fetches data from IndexedDB
+ * 3. renderUI() draws initial state
+ * 4. Observers notify about state changes → re-render
+ * 5. Event handlers update managers → notify observers → re-render
+ *
+ * View Transitions:
+ * - cleanup() called on page change to reset state
+ * - onPageLoad() called on page load to reinitialize
  */
 
 import { FileStore } from "./core/fileStore.js";
@@ -31,9 +43,16 @@ import {
   EMPTY_STATE_SELECTOR,
   UPLOAD_BUTTON_SELECTOR,
 } from "./utils/domSelectors.js";
+import { CONFIG } from "./config.js";
 
-// Constants
-const ITEMS_PER_PAGE = 6;
+// Debug logging enabled in development
+const DEBUG = import.meta.env.DEV;
+
+function log(...args: any[]): void {
+  if (DEBUG) {
+    console.log("[FilesPage]", ...args);
+  }
+}
 
 // Global state - managers and renderers
 let fileStore: FileStore;
@@ -59,10 +78,12 @@ let unsubscribeList: Array<() => void> = [];
  */
 export async function initFilesPage(): Promise<void> {
   try {
+    log("Initializing files page");
+
     // Step 1: Instantiate core managers
-    fileStore = new FileStore(ITEMS_PER_PAGE);
+    fileStore = new FileStore(CONFIG.ITEMS_PER_PAGE);
     selectionManager = new SelectionManager();
-    paginationManager = new PaginationManager(ITEMS_PER_PAGE);
+    paginationManager = new PaginationManager(CONFIG.ITEMS_PER_PAGE);
 
     // Step 2: Instantiate delete managers
     singleDeleteManager = new SingleDeleteManager(fileStore);
@@ -82,6 +103,7 @@ export async function initFilesPage(): Promise<void> {
 
     // Step 5: Load files from IndexedDB
     await fileStore.loadFiles();
+    log("Files loaded:", fileStore.getFiles().length);
 
     // Step 6: Render initial UI
     renderUI();
@@ -94,6 +116,8 @@ export async function initFilesPage(): Promise<void> {
 
     // Step 9: Setup upload button
     setupUploadButton();
+
+    log("Files page initialized successfully");
   } catch (err) {
     console.error("Failed to initialize files page:", err);
     throw err;
@@ -105,6 +129,8 @@ export async function initFilesPage(): Promise<void> {
  * Removes all listeners and resets state.
  */
 export function cleanup(): void {
+  log("Cleanup filesPage");
+
   // Unsubscribe from all observables
   unsubscribeList.forEach((unsub) => unsub());
   unsubscribeList = [];
@@ -197,26 +223,22 @@ function connectObservables(): void {
 function connectEventHandlers(): void {
   // Table: Delete button clicks
   const unsubDeleteClick = tableEventManager.onDeleteClick((fileId) => {
+    log("Delete click:", fileId);
     singleDeleteManager.handleDeleteClick(fileId);
   });
   unsubscribeList.push(unsubDeleteClick);
 
-  // Table: Checkbox changes (individual file selection)
-  const unsubCheckboxChange = tableEventManager.onCheckboxChange((fileId) => {
-    selectionManager.toggle(fileId);
-  });
-  unsubscribeList.push(unsubCheckboxChange);
-
   // Table: Row clicks (navigation to visualizer)
-  // Navigation already handled in tableEventManager, just subscribe to clean up
-  const unsubRowClick = tableEventManager.onRowClick(() => {
-    // Additional logic can be added here if needed in the future
+  const unsubRowClick = tableEventManager.onRowClick((fileId) => {
+    log("Row click:", fileId);
+    window.location.href = `/visualizer?file=${fileId}`;
   });
   unsubscribeList.push(unsubRowClick);
 
   // Selection: Select all checkbox
   const unsubSelectAllChange = selectionEventManager.onSelectAllChange(
     (checked) => {
+      log("Select all change:", checked);
       if (checked) {
         const pageFiles = fileStore.getCurrentPageFiles();
         selectionManager.selectPage(pageFiles);
@@ -231,6 +253,7 @@ function connectEventHandlers(): void {
   // Pagination: Page number clicks
   const unsubPageNumberClick = paginationEventManager.onPageNumberClick(
     (pageNumber) => {
+      log("Page number click:", pageNumber);
       paginationManager.goToPage(pageNumber);
       selectionManager.deselectAll();
       renderUI();
@@ -240,6 +263,7 @@ function connectEventHandlers(): void {
 
   // Pagination: Previous page
   const unsubPrevClick = paginationEventManager.onPrevClick(() => {
+    log("Prev click");
     paginationManager.previousPage();
     selectionManager.deselectAll();
     renderUI();
@@ -248,6 +272,7 @@ function connectEventHandlers(): void {
 
   // Pagination: Next page
   const unsubNextClick = paginationEventManager.onNextClick(() => {
+    log("Next click");
     paginationManager.nextPage();
     selectionManager.deselectAll();
     renderUI();
@@ -256,6 +281,7 @@ function connectEventHandlers(): void {
 
   // Selection bar: Cancel button
   const unsubCancelClick = deleteEventManager.onCancelClick(() => {
+    log("Cancel delete");
     selectionManager.deselectAll();
   });
   unsubscribeList.push(unsubCancelClick);
@@ -266,12 +292,13 @@ function connectEventHandlers(): void {
       const ids = selectionManager.getSelectedIds();
       if (ids.length === 0) return;
 
+      log("Delete selected:", ids.length, "files");
+
       // Show modal and wait for confirmation
       await batchDeleteManager.deleteSelected(ids);
 
-      // Reload files and re-render
+      // Deselect and re-render (FileStore already updated internally)
       selectionManager.deselectAll();
-      await fileStore.loadFiles();
       renderUI();
     }
   );

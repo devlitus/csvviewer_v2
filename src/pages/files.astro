@@ -1,6 +1,8 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
 import FileTable from "../components/files/FileTable.astro";
+import SelectionBar from "../components/files/SelectionBar.astro";
+import ConfirmationModal from "../components/ui/ConfirmationModal.astro";
 ---
 
 <AppLayout
@@ -51,5 +53,11 @@ import FileTable from "../components/files/FileTable.astro";
     <p class="text-xs text-text-light-gray">Start by uploading a CSV file</p>
   </div>
 </AppLayout>
+
+<!-- Selection bar for bulk actions -->
+<SelectionBar />
+
+<!-- Confirmation modal for delete -->
+<ConfirmationModal />
 
 <script src="../scripts/filesPage.ts"></script>

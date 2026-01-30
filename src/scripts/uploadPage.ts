@@ -208,7 +208,10 @@ async function restoreIdleState(): Promise<void> {
   }
 
   // Re-attach browse button listener after HTML restoration
-  setupBrowseButton(fileInput);
+  const uploadZoneElement = document.querySelector(UPLOAD_ZONE_SELECTOR) as HTMLElement;
+  if (uploadZoneElement) {
+    setupBrowseButton(uploadZoneElement, fileInput);
+  }
 }
 
 function updateEmptyState(): void {
@@ -345,7 +348,7 @@ function cleanupUploadZone(): void {
 }
 
 function initializeUploadZone(): void {
-  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR);
+  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR) as HTMLElement;
   const fileInput = document.querySelector(FILE_INPUT_SELECTOR) as HTMLInputElement;
 
   if (!uploadZone || !fileInput) return;
@@ -410,7 +413,7 @@ function initializeUploadZone(): void {
   handlers.push(["drop", dropHandler]);
 
   // Store handlers for cleanup on navigation
-  dragDropListeners = { element: uploadZone, listeners: handlers };
+  dragDropListeners = { element: uploadZone as HTMLElement, listeners: handlers };
 
   // File input change handler
   const changeHandler = async (e: Event) => {
