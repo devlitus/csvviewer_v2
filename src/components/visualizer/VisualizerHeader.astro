@@ -3,7 +3,7 @@ interface Props {
   fileName?: string;
 }
 
-const { fileName = "sales_data_q3.csv" } = Astro.props as Props;
+const { fileName = "Loading..." } = Astro.props as Props;
 ---
 
 <header class="flex items-center justify-between h-16 px-8 border-b border-border-dark flex-shrink-0">
@@ -17,10 +17,10 @@ const { fileName = "sales_data_q3.csv" } = Astro.props as Props;
       </li>
       <li aria-hidden="true">/</li>
       <li>
-        <a href="/visualizer" class="hover:text-text-off-white transition-colors">Visualizer</a>
+        <a href="/" class="hover:text-text-off-white transition-colors">Home</a>
       </li>
       <li aria-hidden="true">/</li>
-      <li class="text-text-off-white font-medium">{fileName}</li>
+      <li class="text-text-off-white font-medium" data-filename>{fileName}</li>
     </ol>
   </nav>
 

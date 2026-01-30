@@ -6,9 +6,29 @@ import CSVTable from "../components/visualizer/CSVTable.astro";
 ---
 
 <AppLayout title="Visualizer" showHeader={false} contentClass="flex-1 overflow-hidden flex flex-col bg-surface-dark">
-  <VisualizerHeader fileName="sales_data_q3.csv" />
-  <DataToolbar showingRows={50} totalRecords={12403} />
+  <!-- Loading State -->
+  <div data-loading-state class="flex-1 flex items-center justify-center">
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-12 h-12 border-4 border-vibrant-blue/20 border-t-vibrant-blue rounded-full animate-spin"></div>
+      <p class="text-text-light-gray">Loading file...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div data-error-state class="hidden flex-1 flex items-center justify-center">
+    <div class="flex flex-col items-center gap-4">
+      <span class="material-symbols-outlined text-4xl text-red-400">error</span>
+      <p data-error-message class="text-text-light-gray">An error occurred</p>
+      <a href="/" class="text-vibrant-blue hover:text-primary transition-colors mt-2">Go back to home</a>
+    </div>
+  </div>
+
+  <!-- Content (will be shown by visualizerPage.ts) -->
+  <VisualizerHeader />
+  <DataToolbar />
   <div class="flex-1 px-8 pb-8 overflow-hidden">
     <CSVTable />
   </div>
 </AppLayout>
+
+<script src="../scripts/visualizerPage.ts"></script>
