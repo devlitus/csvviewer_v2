@@ -34,7 +34,7 @@ const {
           aria-label={column.name ? `Sort by ${column.name}` : "Actions"}
         >
           {column.name && (
-            <div class="flex items-center gap-2">
+            <div class={`flex items-center gap-2 ${column.align === "right" ? "justify-end" : ""}`}>
               {column.name}
               {column.sortIcon && (
                 <span class="material-symbols-outlined text-sm">{column.sortIcon}</span>
