@@ -1,0 +1,48 @@
+---
+interface Column {
+  name: string;
+  align?: "left" | "right";
+  sortIcon?: "unfold_more" | "arrow_downward" | "filter_list";
+}
+
+interface Props {
+  columns?: Column[];
+}
+
+const {
+  columns = [
+    { name: "ID", align: "left", sortIcon: "unfold_more" },
+    { name: "Date", align: "left", sortIcon: "unfold_more" },
+    { name: "Product", align: "left", sortIcon: "unfold_more" },
+    { name: "Category", align: "left", sortIcon: "filter_list" },
+    { name: "Quantity", align: "right", sortIcon: "unfold_more" },
+    { name: "Total Revenue", align: "right", sortIcon: "arrow_downward" },
+    { name: "", align: "right" }
+  ]
+} = Astro.props as Props;
+---
+
+<thead class="bg-surface-card sticky top-0 z-10 shadow-sm">
+  <tr class="border-b border-border-dark">
+    {
+      columns.map((column) => (
+        <th
+          scope="col"
+          class={`px-6 py-4 font-semibold text-text-light-gray border-b border-border-dark ${
+            column.align === "right" ? "text-right" : "text-left"
+          } ${column.name ? "hover:text-text-off-white cursor-pointer transition-colors" : ""}`}
+          aria-label={column.name ? `Sort by ${column.name}` : "Actions"}
+        >
+          {column.name && (
+            <div class="flex items-center gap-2">
+              {column.name}
+              {column.sortIcon && (
+                <span class="material-symbols-outlined text-sm">{column.sortIcon}</span>
+              )}
+            </div>
+          )}
+        </th>
+      ))
+    }
+  </tr>
+</thead>

@@ -1,0 +1,105 @@
+---
+import CSVTableHeader from "./CSVTableHeader.astro";
+import CSVTableRow from "./CSVTableRow.astro";
+import TablePagination from "./TablePagination.astro";
+
+interface Column {
+  name: string;
+  align?: "left" | "right";
+  sortIcon?: "unfold_more" | "arrow_downward" | "filter_list";
+}
+
+interface Props {
+  columns?: Column[];
+  rows?: Record<string, string | number>[];
+}
+
+// Datos de ejemplo del diseño (8 filas)
+const exampleRows = [
+  {
+    id: "S001",
+    date: "2024-07-01",
+    product: "Wireless Headphones",
+    category: "Electronics",
+    quantity: 15,
+    revenue: "$2,247.50"
+  },
+  {
+    id: "S002",
+    date: "2024-07-01",
+    product: "Desk Lamp",
+    category: "Furniture",
+    quantity: 8,
+    revenue: "$599.92"
+  },
+  {
+    id: "S003",
+    date: "2024-07-02",
+    product: "Laptop Stand",
+    category: "Accessories",
+    quantity: 22,
+    revenue: "$1,298.00"
+  },
+  {
+    id: "S004",
+    date: "2024-07-02",
+    product: "4K Monitor",
+    category: "Electronics",
+    quantity: 5,
+    revenue: "$2,245.95"
+  },
+  {
+    id: "S005",
+    date: "2024-07-03",
+    product: "Office Chair",
+    category: "Furniture",
+    quantity: 12,
+    revenue: "$4,788.00"
+  },
+  {
+    id: "S006",
+    date: "2024-07-03",
+    product: "USB-C Hub",
+    category: "Accessories",
+    quantity: 34,
+    revenue: "$1,088.00"
+  },
+  {
+    id: "S007",
+    date: "2024-07-04",
+    product: "Mechanical Keyboard",
+    category: "Electronics",
+    quantity: 28,
+    revenue: "$3,920.00"
+  },
+  {
+    id: "S008",
+    date: "2024-07-04",
+    product: "Monitor Arm",
+    category: "Furniture",
+    quantity: 18,
+    revenue: "$1,476.00"
+  }
+];
+
+const { columns, rows = exampleRows } = Astro.props as Props;
+---
+
+<div class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden">
+  <!-- Table with scroll -->
+  <div class="flex-1 overflow-auto">
+    <table class="w-full text-left text-sm whitespace-nowrap">
+      <CSVTableHeader {columns} />
+      <tbody class="divide-y divide-border-dark/30">
+        {
+          rows.map((row, index) => (
+            <CSVTableRow rowData={row} rowIndex={index} />
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination footer -->
+  <TablePagination currentPage={1} totalPages={24} />
+</div>

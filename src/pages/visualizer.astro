@@ -1,0 +1,12 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+import VisualizerHeader from "../components/visualizer/VisualizerHeader.astro";
+import DataToolbar from "../components/visualizer/DataToolbar.astro";
+import CSVTable from "../components/visualizer/CSVTable.astro";
+---
+
+<AppLayout title="Visualizer" showHeader={false} contentClass="flex-1 overflow-hidden flex flex-col bg-surface-dark">
+  <VisualizerHeader fileName="sales_data_q3.csv" />
+  <DataToolbar showingRows={50} totalRecords={12403} />
+  <CSVTable />
+</AppLayout>
