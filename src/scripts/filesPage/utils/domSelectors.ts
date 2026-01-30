@@ -5,6 +5,9 @@
  * Facilita cambios de markup sin afectar la lógica de negocio.
  */
 
+/** Contenedor principal de la tabla de archivos (thead + tbody) */
+export const TABLE_SELECTOR: string = "[data-file-table]";
+
 /** Contenedor del cuerpo de la tabla de archivos */
 export const TABLE_BODY_SELECTOR: string = "[data-file-table-body]";
 

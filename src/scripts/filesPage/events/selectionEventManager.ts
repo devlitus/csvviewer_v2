@@ -8,15 +8,15 @@
  * Complementario a TableEventManager
  */
 
-import { TABLE_BODY_SELECTOR } from "../utils/domSelectors.js";
+import { TABLE_SELECTOR } from "../utils/domSelectors.js";
 
 export class SelectionEventManager {
-  private tableBody: HTMLElement | null;
+  private tableElement: HTMLElement | null;
   private domListeners: Map<string, EventListener> = new Map();
   private callbackSets: Map<string, Set<Function>> = new Map();
 
-  constructor(tableBodySelector: string = TABLE_BODY_SELECTOR) {
-    this.tableBody = document.querySelector(tableBodySelector);
+  constructor(tableSelector: string = TABLE_SELECTOR) {
+    this.tableElement = document.querySelector(tableSelector);
     this.setupDelegation();
   }
 
@@ -25,7 +25,7 @@ export class SelectionEventManager {
    * Se ejecuta una sola vez en el constructor
    */
   private setupDelegation(): void {
-    if (!this.tableBody) return;
+    if (!this.tableElement) return;
 
     // Unified change handler for both individual and select-all checkboxes
     const changeHandler: EventListener = (e: Event) => {
@@ -54,7 +54,7 @@ export class SelectionEventManager {
     this.domListeners.set("change", changeHandler);
 
     // Registrar un único listener para cambios en checkboxes
-    this.tableBody.addEventListener("change", changeHandler);
+    this.tableElement.addEventListener("change", changeHandler);
   }
 
   /**
@@ -123,11 +123,11 @@ export class SelectionEventManager {
    * Llamado en View Transitions
    */
   cleanup(): void {
-    if (!this.tableBody) return;
+    if (!this.tableElement) return;
 
     const changeHandler = this.domListeners.get("change");
     if (changeHandler) {
-      this.tableBody.removeEventListener("change", changeHandler);
+      this.tableElement.removeEventListener("change", changeHandler);
     }
 
     // Limpiar listeners

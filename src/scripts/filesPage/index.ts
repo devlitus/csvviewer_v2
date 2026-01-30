@@ -37,6 +37,7 @@ import { SelectionEventManager } from "./events/selectionEventManager.js";
 import { PaginationEventManager } from "./events/paginationEventManager.js";
 import { DeleteEventManager } from "./events/deleteEventManager.js";
 import {
+  TABLE_SELECTOR,
   TABLE_BODY_SELECTOR,
   PAGINATION_SELECTOR,
   SELECTION_BAR_SELECTOR,
@@ -97,7 +98,7 @@ export async function initFilesPage(): Promise<void> {
 
     // Step 4: Instantiate event managers
     tableEventManager = new TableEventManager(TABLE_BODY_SELECTOR);
-    selectionEventManager = new SelectionEventManager(TABLE_BODY_SELECTOR);
+    selectionEventManager = new SelectionEventManager(TABLE_SELECTOR);
     paginationEventManager = new PaginationEventManager(PAGINATION_SELECTOR);
     deleteEventManager = new DeleteEventManager(SELECTION_BAR_SELECTOR);
 
@@ -249,6 +250,13 @@ function connectEventHandlers(): void {
     }
   );
   unsubscribeList.push(unsubSelectAllChange);
+
+  // Selection: Individual checkbox changes
+  const unsubCheckboxChange = selectionEventManager.onCheckboxChange((fileId) => {
+    log("Checkbox change:", fileId);
+    selectionManager.toggle(fileId);
+  });
+  unsubscribeList.push(unsubCheckboxChange);
 
   // Pagination: Page number clicks
   const unsubPageNumberClick = paginationEventManager.onPageNumberClick(
