@@ -41,3 +41,59 @@
     @apply bg-text-light-gray;
   }
 }
+
+@layer utilities {
+
+  /* Animation for file row deletion */
+  @keyframes fadeOutRow {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+      height: auto;
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(-20px);
+      height: 0;
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  .animate-delete-row {
+    animation: fadeOutRow 300ms ease-out forwards;
+  }
+
+  /* Selection bar entrance animation */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 300ms ease-out forwards;
+  }
+
+  /* Modal backdrop entrance */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-out forwards;
+  }
+}

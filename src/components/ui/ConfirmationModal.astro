@@ -1,0 +1,49 @@
+---
+// Generic confirmation modal for delete operations
+---
+
+<div
+  data-confirmation-modal
+  class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  style="display: none;"
+>
+  <div
+    class="bg-surface-card border border-border-dark rounded-xl shadow-xl shadow-black/50 p-6 max-w-sm mx-4"
+  >
+    <!-- Header -->
+    <div class="mb-4">
+      <h2 id="modal-title" class="text-lg font-bold text-text-off-white">
+        Delete files?
+      </h2>
+      <p class="text-sm text-text-light-gray mt-1">
+        <span data-confirmation-message>Delete file?</span> This action cannot be
+        undone.
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div class="h-px bg-border-dark/50 mb-6"></div>
+
+    <!-- Actions -->
+    <div class="flex gap-3 justify-end">
+      <button
+        data-cancel-button
+        class="px-4 py-2 rounded-lg border border-border-dark text-text-light-gray hover:bg-white/5 hover:border-text-light-gray hover:text-text-off-white transition-colors text-sm font-medium"
+        aria-label="Cancel delete operation"
+      >
+        Cancel
+      </button>
+      <button
+        data-confirm-button
+        class="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-colors text-sm font-bold flex items-center gap-2"
+        aria-label="Confirm delete"
+      >
+        <span class="material-symbols-outlined text-base">delete</span>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 ---
 name: implementer
 description: Experto en desarrollo web que implementa features, refactors y correcciones siguiendo planes paso a paso. Usa proactivamente cuando haya que escribir o modificar codigo del proyecto.
-tools: Read, Edit, Write, Grep, Glob, Bash, WebSearch, WebFetch
+tools: Read, Edit, Write, Grep, Glob, Bash, WebSearch, WebFetch, task
 model: haiku
 color: "#4682B4"
 ---

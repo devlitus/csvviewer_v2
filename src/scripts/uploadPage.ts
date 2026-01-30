@@ -1,6 +1,8 @@
 import type { CSVFile } from "../lib/types";
 import { saveFile, getAllFiles } from "../lib/indexeddb";
 import { parseCSVString } from "../lib/csvParser";
+import { formatFileSize, formatRelativeDate } from "../lib/formatters";
+import { onPageLoad, onBeforeSwap } from "../lib/pageInit";
 
 const UPLOAD_ZONE_SELECTOR = "[data-upload-zone]";
 const FILE_INPUT_SELECTOR = "#file-upload-input";
@@ -13,6 +15,11 @@ const EMPTY_STATE_SELECTOR = "[data-empty-state]";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ERROR_AUTO_HIDE_DELAY = 5000; // 5 seconds
 let IDLE_STATE_HTML: string = "";
+
+// Track event listeners for cleanup
+let dragDropListeners: { element: HTMLElement; listeners: Array<[string, EventListener]> } | null = null;
+let fileChangeListener: EventListener | null = null;
+let browseButtonListener: { element: HTMLElement; listener: EventListener } | null = null;
 
 interface ErrorScenario {
   condition: (file: File) => boolean;
@@ -34,35 +41,6 @@ const errorScenarios: ErrorScenario[] = [
     message: "The file is empty",
   },
 ];
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + sizes[i];
-}
-
-function formatRelativeDate(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
-  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
-  if (days < 7) return `${days} day${days !== 1 ? "s" : ""} ago`;
-
-  const date = new Date(timestamp);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
-  });
-}
 
 function renderFileCard(file: CSVFile): string {
   const size = formatFileSize(file.size);
@@ -86,7 +64,7 @@ function renderFileCard(file: CSVFile): string {
   const escapedDate = escapeHtml(date);
 
   const cardElement = `
-    <div data-file-card class="bg-surface-card border border-border-dark rounded-xl p-4 hover:border-vibrant-blue transition-all duration-300 group cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300" data-file-id="${file.id}">
+    <div data-file-card class="bg-surface-card border border-border-dark rounded-xl p-4 hover:border-vibrant-blue transition-all duration-300 group cursor-pointer animate-in fade-in slide-in-from-bottom-2" data-file-id="${escapeHtml(file.id)}">
       <div class="flex items-start justify-between mb-3">
         <div class="${iconColorClass} w-10 h-10 rounded-lg flex items-center justify-center">
           <span class="material-symbols-outlined text-lg">table_view</span>
@@ -174,17 +152,17 @@ async function showLoadingState(): Promise<void> {
   uploadContent.innerHTML = spinnerHTML;
 }
 
-function setupBrowseButton(fileInput: HTMLInputElement): void {
-  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR);
-  if (!uploadZone) return;
-
+function setupBrowseButton(uploadZone: HTMLElement, fileInput: HTMLInputElement): void {
   const browseButton = uploadZone.querySelector('button[type="button"]') as HTMLButtonElement;
-  if (browseButton) {
-    browseButton.addEventListener('click', (e: Event) => {
-      e.preventDefault();
-      fileInput.click();
-    });
-  }
+  if (!browseButton) return;
+
+  const clickHandler = (e: Event) => {
+    e.preventDefault();
+    fileInput.click();
+  };
+
+  browseButton.addEventListener('click', clickHandler);
+  browseButtonListener = { element: browseButton, listener: clickHandler };
 }
 
 async function restoreIdleState(): Promise<void> {
@@ -230,7 +208,10 @@ async function restoreIdleState(): Promise<void> {
   }
 
   // Re-attach browse button listener after HTML restoration
-  setupBrowseButton(fileInput);
+  const uploadZoneElement = document.querySelector(UPLOAD_ZONE_SELECTOR) as HTMLElement;
+  if (uploadZoneElement) {
+    setupBrowseButton(uploadZoneElement, fileInput);
+  }
 }
 
 function updateEmptyState(): void {
@@ -341,32 +322,69 @@ async function processFile(file: File): Promise<void> {
   }
 }
 
+function cleanupUploadZone(): void {
+  // Remove previously attached listeners to prevent duplicates
+  if (dragDropListeners) {
+    const { element, listeners } = dragDropListeners;
+    listeners.forEach(([event, handler]) => {
+      element.removeEventListener(event, handler);
+    });
+  }
+  dragDropListeners = null;
+
+  if (fileChangeListener) {
+    const fileInput = document.querySelector(FILE_INPUT_SELECTOR) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.removeEventListener('change', fileChangeListener);
+    }
+  }
+  fileChangeListener = null;
+
+  if (browseButtonListener) {
+    const { element, listener } = browseButtonListener;
+    element.removeEventListener('click', listener);
+  }
+  browseButtonListener = null;
+}
+
 function initializeUploadZone(): void {
-  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR);
+  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR) as HTMLElement;
   const fileInput = document.querySelector(FILE_INPUT_SELECTOR) as HTMLInputElement;
 
   if (!uploadZone || !fileInput) return;
 
-  // Setup Browse Files button
-  setupBrowseButton(fileInput);
+  // Clean up any existing listeners
+  cleanupUploadZone();
+
+  // Setup Browse Files button (tracked for cleanup)
+  setupBrowseButton(uploadZone, fileInput);
+
+  // Track handlers for cleanup
+  const handlers: Array<[string, EventListener]> = [];
 
   // Drag and drop handlers
-  uploadZone.addEventListener("dragenter", (e: Event) => {
+  const dragenterHandler = (e: Event) => {
     e.preventDefault();
     uploadZone.classList.add("drag-over");
-  });
+  };
+  uploadZone.addEventListener("dragenter", dragenterHandler);
+  handlers.push(["dragenter", dragenterHandler]);
 
-  uploadZone.addEventListener("dragover", (e: Event) => {
+  const dragoverHandler = (e: Event) => {
     e.preventDefault();
     uploadZone.classList.add("drag-over");
-  });
+  };
+  uploadZone.addEventListener("dragover", dragoverHandler);
+  handlers.push(["dragover", dragoverHandler]);
 
-  uploadZone.addEventListener("dragleave", (e: Event) => {
+  const dragleaveHandler = (e: Event) => {
     e.preventDefault();
     uploadZone.classList.remove("drag-over");
-  });
+  };
+  uploadZone.addEventListener("dragleave", dragleaveHandler);
+  handlers.push(["dragleave", dragleaveHandler]);
 
-  uploadZone.addEventListener("drop", async (e: Event) => {
+  const dropHandler = async (e: Event) => {
     e.preventDefault();
     uploadZone.classList.remove("drag-over");
 
@@ -390,10 +408,15 @@ function initializeUploadZone(): void {
     if (files.length > 1 && processedCount > 0) {
       showError(`Only the first ${processedCount} CSV file(s) will be processed`);
     }
-  });
+  };
+  uploadZone.addEventListener("drop", dropHandler);
+  handlers.push(["drop", dropHandler]);
+
+  // Store handlers for cleanup on navigation
+  dragDropListeners = { element: uploadZone as HTMLElement, listeners: handlers };
 
   // File input change handler
-  fileInput.addEventListener("change", async (e: Event) => {
+  const changeHandler = async (e: Event) => {
     const inputEvent = e as Event;
     const input = inputEvent.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -401,7 +424,9 @@ function initializeUploadZone(): void {
     }
     // Reset input so same file can be uploaded again
     input.value = "";
-  });
+  };
+  fileInput.addEventListener("change", changeHandler);
+  fileChangeListener = changeHandler;
 }
 
 async function loadRecentFiles(): Promise<void> {
@@ -437,13 +462,19 @@ async function loadRecentFiles(): Promise<void> {
 
 // Initialize when DOM is ready
 function initializeUploadPage(): void {
+  // Reset state on each initialization (important for View Transitions)
+  IDLE_STATE_HTML = "";
   initializeUploadZone();
   loadRecentFiles();
 }
 
-// Wait for DOM to be ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeUploadPage);
-} else {
+// Use View Transitions compatible initialization
+onPageLoad(() => {
   initializeUploadPage();
-}
+});
+
+// Cleanup before page swap to prevent duplicate listeners
+onBeforeSwap(() => {
+  cleanupUploadZone();
+  IDLE_STATE_HTML = "";
+});

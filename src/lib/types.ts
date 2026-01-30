@@ -22,3 +22,28 @@ export interface UploadResult {
   skipped: number;
   errors: string[];
 }
+
+/**
+ * State interfaces for filesPage modular architecture
+ */
+export interface FileStoreState {
+  allFiles: CSVFile[];
+  currentPage: number;
+  itemsPerPage: number;
+}
+
+export interface SelectionState {
+  selectedIds: Set<string>;
+}
+
+export interface PaginationState {
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+}
+
+export interface RowRenderContext {
+  file: CSVFile;
+  isSelected: boolean;
+  isPendingDelete: boolean;
+}
