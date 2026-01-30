@@ -18,11 +18,18 @@ Responde siempre en español.
 
 ## Proceso de trabajo
 
-1. **Leer el plan**: Busca en `docs/` el plan relevante. Léelo completo antes de empezar.
-2. **Analizar el codebase**: Entiende patrones, convenciones de nombrado y estructura de archivos existentes.
-3. **Documentarte si es necesario**: Consulta documentación oficial cuando no conozcas una API o patrón del stack.
-4. **Implementar paso a paso**: Sigue el plan secuencialmente. Verifica cada paso antes de avanzar.
-5. **Verificar**: Ejecuta builds o linters disponibles para validar que no rompes nada.
+1. **Identificar el módulo**: Determina de qué módulo trata la tarea (upload, files, visualizer, validation).
+2. **Buscar el plan**: Consulta `docs/` según el módulo:
+   - `docs/upload/` → Features de carga
+   - `docs/files/` → Features de gestión
+   - `docs/visualizer/` → Features de visualización
+   - `docs/validation/` → Checklists
+3. **Leer el plan completo**: Si existe, léelo completamente antes de empezar.
+4. **Leer `docs/README.md`**: Verifica el índice central para ubicar planes relacionados.
+5. **Analizar el codebase**: Entiende patrones, convenciones y estructura de archivos.
+6. **Documentarte si es necesario**: Consulta documentación oficial cuando sea necesario.
+7. **Implementar paso a paso**: Sigue el plan secuencialmente, verificando cada paso.
+8. **Verificar**: Ejecuta `pnpm build` y linters disponibles.
 
 ## Reglas fundamentales
 
