@@ -8,6 +8,7 @@ import { onPageLoad, onBeforeSwap } from "../lib/pageInit";
 const LOADING_STATE_SELECTOR = "[data-loading-state]";
 const ERROR_STATE_SELECTOR = "[data-error-state]";
 const ERROR_MESSAGE_SELECTOR = "[data-error-message]";
+const VISUALIZER_CONTENT_SELECTOR = "[data-visualizer-content]";
 const TABLE_CONTAINER_SELECTOR = "[data-csv-table-container]";
 const TABLE_BODY_SELECTOR = "[data-csv-table-body]";
 const TABLE_HEADER_SELECTOR = "[data-table-header]";
@@ -42,39 +43,64 @@ let paginationState: PaginationState = {
 let allData: Record<string, string>[] = [];
 let columns: string[] = [];
 
+// Track event listeners for cleanup
+let paginationListeners: Array<{ element: HTMLElement; listeners: Array<[string, EventListener]> }> = [];
+let selectChangeListener: { element: HTMLSelectElement; listener: EventListener } | null = null;
+
 /**
  * Initialize visualizer page
  */
 async function initVisualizerPage(): Promise<void> {
   try {
-    // Hide error state and show loading state
+    // Show loading state first
     showLoadingState();
 
-    // Get file ID from URL
+    // Get file ID from URL with validation
     const urlParams = new URLSearchParams(window.location.search);
     const fileId = urlParams.get("file");
 
-    if (!fileId) {
+    if (!fileId || fileId.trim() === "") {
       showErrorState("No file specified. Please select a file to visualize.");
       return;
     }
 
-    // Load file from IndexedDB
-    const file = await loadFileData(fileId);
+    // Load file from IndexedDB with timeout
+    const fileLoadPromise = loadFileData(fileId);
+    const timeoutPromise = new Promise<CSVFile | null>((resolve) =>
+      setTimeout(() => resolve(null), 10000) // 10 second timeout
+    );
+    const file = await Promise.race([fileLoadPromise, timeoutPromise]);
+
     if (!file) {
-      showErrorState("File not found. The file may have been deleted.");
+      showErrorState(
+        "File not found or request timed out. The file may have been deleted."
+      );
       return;
     }
 
-    // Parse CSV content
-    const parseResult = parseCSVString(file.content);
+    // Validate file has content
+    if (!file.content || file.content.trim() === "") {
+      showErrorState("This file has no content.");
+      return;
+    }
+
+    // Parse CSV content with error handling
+    let parseResult;
+    try {
+      parseResult = parseCSVString(file.content);
+    } catch (parseErr) {
+      const errorMsg = parseErr instanceof Error ? parseErr.message : "Unknown error";
+      showErrorState(`Error parsing CSV: ${errorMsg}`);
+      return;
+    }
+
     if (parseResult.error) {
       showErrorState(`Error parsing CSV: ${parseResult.error}`);
       return;
     }
 
     // Check if file has data
-    if (parseResult.data.length === 0) {
+    if (!parseResult.data || parseResult.data.length === 0) {
       showErrorState("This CSV file has no data rows.");
       return;
     }
@@ -87,8 +113,14 @@ async function initVisualizerPage(): Promise<void> {
     );
     paginationState.currentPage = 1;
 
-    // Extract columns from first row
-    columns = Object.keys(allData[0]);
+    // Extract columns from first row and validate
+    const firstRow = allData[0];
+    if (!firstRow || Object.keys(firstRow).length === 0) {
+      showErrorState("CSV file has no columns.");
+      return;
+    }
+
+    columns = Object.keys(firstRow);
 
     // Update UI
     updateHeader(file.filename);
@@ -108,6 +140,7 @@ async function initVisualizerPage(): Promise<void> {
     hideLoadingState();
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : "Unknown error";
+    console.error("Visualizer initialization error:", err);
     showErrorState(`An error occurred: ${errorMsg}`);
   }
 }
@@ -267,42 +300,60 @@ function updatePagination(): void {
  * Setup pagination event listeners
  */
 function setupPaginationEvents(): void {
-  const firstBtn = document.querySelector(PAGINATION_FIRST);
-  const prevBtn = document.querySelector(PAGINATION_PREV);
-  const nextBtn = document.querySelector(PAGINATION_NEXT);
-  const lastBtn = document.querySelector(PAGINATION_LAST);
+  const firstBtn = document.querySelector(PAGINATION_FIRST) as HTMLButtonElement;
+  const prevBtn = document.querySelector(PAGINATION_PREV) as HTMLButtonElement;
+  const nextBtn = document.querySelector(PAGINATION_NEXT) as HTMLButtonElement;
+  const lastBtn = document.querySelector(PAGINATION_LAST) as HTMLButtonElement;
 
-  firstBtn?.addEventListener("click", () => {
+  const handleFirstClick = () => {
     paginationState.currentPage = 1;
     renderTableBody(columns, allData, paginationState.currentPage);
     updatePagination();
     scrollToTable();
-  });
+  };
 
-  prevBtn?.addEventListener("click", () => {
+  const handlePrevClick = () => {
     if (paginationState.currentPage > 1) {
       paginationState.currentPage--;
       renderTableBody(columns, allData, paginationState.currentPage);
       updatePagination();
       scrollToTable();
     }
-  });
+  };
 
-  nextBtn?.addEventListener("click", () => {
+  const handleNextClick = () => {
     if (paginationState.currentPage < paginationState.totalPages) {
       paginationState.currentPage++;
       renderTableBody(columns, allData, paginationState.currentPage);
       updatePagination();
       scrollToTable();
     }
-  });
+  };
 
-  lastBtn?.addEventListener("click", () => {
+  const handleLastClick = () => {
     paginationState.currentPage = paginationState.totalPages;
     renderTableBody(columns, allData, paginationState.currentPage);
     updatePagination();
     scrollToTable();
-  });
+  };
+
+  // Store listeners for cleanup
+  if (firstBtn) {
+    firstBtn.addEventListener("click", handleFirstClick);
+    paginationListeners.push({ element: firstBtn, listeners: [["click", handleFirstClick]] });
+  }
+  if (prevBtn) {
+    prevBtn.addEventListener("click", handlePrevClick);
+    paginationListeners.push({ element: prevBtn, listeners: [["click", handlePrevClick]] });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", handleNextClick);
+    paginationListeners.push({ element: nextBtn, listeners: [["click", handleNextClick]] });
+  }
+  if (lastBtn) {
+    lastBtn.addEventListener("click", handleLastClick);
+    paginationListeners.push({ element: lastBtn, listeners: [["click", handleLastClick]] });
+  }
 }
 
 /**
@@ -312,7 +363,7 @@ function setupRowsPerPageChange(): void {
   const select = document.querySelector(ROWS_PER_PAGE_SELECT) as HTMLSelectElement;
   if (!select) return;
 
-  select.addEventListener("change", (e) => {
+  const handleChange = (e: Event) => {
     const newValue = parseInt((e.target as HTMLSelectElement).value, 10);
     paginationState.rowsPerPage = newValue;
     paginationState.totalPages = Math.ceil(
@@ -327,7 +378,10 @@ function setupRowsPerPageChange(): void {
     );
     updatePagination();
     scrollToTable();
-  });
+  };
+
+  select.addEventListener("change", handleChange);
+  selectChangeListener = { element: select, listener: handleChange };
 }
 
 /**
@@ -345,21 +399,17 @@ function scrollToTable(): void {
  */
 function showLoadingState(): void {
   const loadingEl = document.querySelector(LOADING_STATE_SELECTOR);
-  const headerEl = document.querySelector(HEADER_FILENAME_SELECTOR);
-  const toolbarEl = document.querySelector(TOOLBAR_SELECTOR);
-  const tableEl = document.querySelector(TABLE_CONTAINER_SELECTOR);
+  const contentEl = document.querySelector(VISUALIZER_CONTENT_SELECTOR);
+  const errorEl = document.querySelector(ERROR_STATE_SELECTOR);
 
   if (loadingEl) {
     loadingEl.classList.remove("hidden");
   }
-  if (headerEl) {
-    headerEl.closest("header")?.classList.add("hidden");
+  if (contentEl) {
+    (contentEl as HTMLElement).style.display = "none";
   }
-  if (toolbarEl) {
-    toolbarEl.closest("div")?.classList.add("hidden");
-  }
-  if (tableEl) {
-    tableEl.classList.add("hidden");
+  if (errorEl) {
+    errorEl.classList.add("hidden");
   }
 }
 
@@ -368,21 +418,13 @@ function showLoadingState(): void {
  */
 function hideLoadingState(): void {
   const loadingEl = document.querySelector(LOADING_STATE_SELECTOR);
-  const headerEl = document.querySelector(HEADER_FILENAME_SELECTOR);
-  const toolbarEl = document.querySelector(TOOLBAR_SELECTOR);
-  const tableEl = document.querySelector(TABLE_CONTAINER_SELECTOR);
+  const contentEl = document.querySelector(VISUALIZER_CONTENT_SELECTOR);
 
   if (loadingEl) {
     loadingEl.classList.add("hidden");
   }
-  if (headerEl) {
-    headerEl.closest("header")?.classList.remove("hidden");
-  }
-  if (toolbarEl) {
-    toolbarEl.closest("div")?.classList.remove("hidden");
-  }
-  if (tableEl) {
-    tableEl.classList.remove("hidden");
+  if (contentEl) {
+    (contentEl as HTMLElement).style.display = "contents";
   }
 }
 
@@ -393,9 +435,7 @@ function showErrorState(message: string): void {
   const errorEl = document.querySelector(ERROR_STATE_SELECTOR);
   const msgEl = document.querySelector(ERROR_MESSAGE_SELECTOR);
   const loadingEl = document.querySelector(LOADING_STATE_SELECTOR);
-  const headerEl = document.querySelector(HEADER_FILENAME_SELECTOR);
-  const toolbarEl = document.querySelector(TOOLBAR_SELECTOR);
-  const tableEl = document.querySelector(TABLE_CONTAINER_SELECTOR);
+  const contentEl = document.querySelector(VISUALIZER_CONTENT_SELECTOR);
 
   if (errorEl) {
     errorEl.classList.remove("hidden");
@@ -406,14 +446,8 @@ function showErrorState(message: string): void {
   if (loadingEl) {
     loadingEl.classList.add("hidden");
   }
-  if (headerEl) {
-    headerEl.closest("header")?.classList.add("hidden");
-  }
-  if (toolbarEl) {
-    toolbarEl.closest("div")?.classList.add("hidden");
-  }
-  if (tableEl) {
-    tableEl.classList.add("hidden");
+  if (contentEl) {
+    (contentEl as HTMLElement).style.display = "none";
   }
 }
 
@@ -431,6 +465,25 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => map[char]);
 }
 
+/**
+ * Cleanup all event listeners
+ */
+function cleanupEventListeners(): void {
+  // Remove pagination listeners
+  paginationListeners.forEach(({ element, listeners }) => {
+    listeners.forEach(([eventType, listener]) => {
+      element.removeEventListener(eventType, listener);
+    });
+  });
+  paginationListeners = [];
+
+  // Remove rows per page change listener
+  if (selectChangeListener) {
+    selectChangeListener.element.removeEventListener("change", selectChangeListener.listener);
+    selectChangeListener = null;
+  }
+}
+
 // Initialize on page load with View Transitions support
 onPageLoad(() => {
   initVisualizerPage();
@@ -438,6 +491,7 @@ onPageLoad(() => {
 
 // Cleanup on before swap
 onBeforeSwap(() => {
+  cleanupEventListeners();
   allData = [];
   columns = [];
   paginationState = {

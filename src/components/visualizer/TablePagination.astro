@@ -7,10 +7,15 @@ interface Props {
 const { currentPage = 1, totalPages = 24 } = Astro.props as Props;
 ---
 
-<div class="border-t border-border-dark bg-surface-card p-3 flex flex-col sm:flex-row items-center justify-between gap-4 flex-shrink-0" data-pagination-container>
+<div
+  class="border-t border-border-dark bg-surface-card p-3 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0"
+  data-pagination-container
+>
   <!-- Left side: Rows per page -->
   <div class="flex items-center gap-3 text-xs text-text-light-gray">
-    <label for="rows-per-page" class="text-text-light-gray">Rows per page:</label>
+    <label for="rows-per-page" class="text-text-light-gray"
+      >Rows per page:</label
+    >
     <select
       id="rows-per-page"
       data-rows-per-page
@@ -40,8 +45,12 @@ const { currentPage = 1, totalPages = 24 } = Astro.props as Props;
       <span class="material-symbols-outlined text-sm">chevron_left</span>
     </button>
 
-    <span class="px-3 py-1 text-xs text-text-light-gray min-w-[80px] text-center">
-      Page <span data-current-page>{currentPage}</span> of <span data-total-pages>{totalPages}</span>
+    <span
+      class="px-3 py-1 text-xs text-text-light-gray min-w-20 text-center"
+    >
+      Page <span data-current-page>{currentPage}</span> of <span
+        data-total-pages>{totalPages}</span
+      >
     </span>
 
     <button

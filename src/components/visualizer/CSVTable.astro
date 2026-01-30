@@ -16,7 +16,10 @@ interface Props {
 const { columns = [], rows = [] } = Astro.props as Props;
 ---
 
-<div class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden" data-csv-table-container>
+<div
+  class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden"
+  data-csv-table-container
+>
   <!-- Table with scroll -->
   <div class="flex-1 overflow-auto">
     <table class="w-full text-left text-sm whitespace-nowrap">
