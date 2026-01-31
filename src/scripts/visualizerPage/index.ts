@@ -41,6 +41,9 @@ import { loadAndParseFile } from "./utils/dataLoader";
 import { CONFIG } from "./config";
 import { onPageLoad, onBeforeSwap } from "../../lib/pageInit";
 
+// Initialization flag to prevent race conditions from concurrent async calls
+let isInitializing = false;
+
 // Managers (instantiated in init)
 let dataStore: DataStore;
 let paginationManager: PaginationManager;
@@ -59,6 +62,14 @@ let uiState: UIStateManager;
  * Initialize visualizer page
  */
 async function initVisualizerPage(): Promise<void> {
+  // Prevent race conditions from concurrent async calls
+  if (isInitializing) {
+    console.warn("Visualizer page initialization already in progress, skipping");
+    return;
+  }
+
+  isInitializing = true;
+
   try {
     // Instantiate managers
     dataStore = new DataStore();
@@ -122,6 +133,8 @@ async function initVisualizerPage(): Promise<void> {
     const errorMsg = err instanceof Error ? err.message : "Unknown error";
     console.error("Visualizer initialization error:", err);
     uiState.showError(`An error occurred: ${errorMsg}`);
+  } finally {
+    isInitializing = false;
   }
 }
 
@@ -293,6 +306,10 @@ function scrollToTable(): void {
  * Cleanup all resources
  */
 function cleanup(): void {
+  if (import.meta.env.DEV) {
+    console.log("[VisualizerPage] Cleaning up...");
+  }
+
   // Cleanup event managers
   paginationEvents?.cleanup();
   rowsPerPageEvents?.cleanup();
@@ -304,7 +321,10 @@ function cleanup(): void {
 
 // Lifecycle hooks
 onPageLoad(() => {
-  initVisualizerPage();
+  cleanup();  // Cleanup ANTES de init
+  initVisualizerPage().catch(err => {
+    console.error("Failed to initialize visualizer page:", err);
+  });
 });
 
 onBeforeSwap(() => {
