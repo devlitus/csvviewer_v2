@@ -206,6 +206,49 @@ docs/                            # Documentación de planes
 | **Direct Imports** | Lógica compartida | `import { getAllFiles } from '../lib/indexeddb'` |
 | **ViewTransitions** | Navegación sin reload | `<ViewTransitions />` en Layout.astro |
 
+### Patrones de Inicialización de Página
+
+Para evitar listeners duplicados y race conditions de ViewTransitions, se recomienda el siguiente patrón en scripts de página (`uploadPage.ts`, `filesPage.ts`, `visualizerPage/index.ts`):
+
+```typescript
+// ✅ Correcto - Cleanup ANTES de init
+onPageLoad(() => {
+  cleanup();  // Elimina listeners y resetea estado
+  initPage().catch(err => {
+    console.error("Failed to initialize page:", err);
+  });
+});
+
+// Con flag de inicialización para async
+let isInitializing = false;
+
+async function initPage(): Promise<void> {
+  // Previene race conditions de llamadas asincrónicas concurrentes
+  if (isInitializing) {
+    console.warn("Page initialization already in progress, skipping");
+    return;
+  }
+
+  isInitializing = true;
+
+  try {
+    // Lógica de inicialización
+  } catch (err) {
+    console.error("Initialization error:", err);
+  } finally {
+    isInitializing = false;  // Resetear flag siempre
+  }
+}
+```
+
+**Por qué este patrón:**
+1. **Cleanup ANTES de init** → Garantiza que se limpien listeners anteriores incluso si hay errores
+2. **Flag `isInitializing`** → Previene múltiples inicializaciones concurrentes
+3. **Try-catch-finally** → Resetea el flag en cualquier escenario (éxito o error)
+4. **Promise.catch()** → Maneja errores sin romper la cadena de inicialización
+
+Este patrón se implementa actualmente en `visualizerPage/index.ts`. Los módulos `uploadPage.ts` y `filesPage.ts` usan variantes parciales. Se recomienda adoptar este patrón completo en todos los scripts de página para máxima robustez contra ViewTransitions y race conditions.
+
 ### Sistema de Diseño
 
 **Colores (tokens CSS en `global.css`):**
