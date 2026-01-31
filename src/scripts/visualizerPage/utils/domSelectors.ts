@@ -30,3 +30,11 @@ export const PAGINATION_FIRST = "[data-pagination-first]";
 export const PAGINATION_PREV = "[data-pagination-prev]";
 export const PAGINATION_NEXT = "[data-pagination-next]";
 export const PAGINATION_LAST = "[data-pagination-last]";
+
+// Column Visibility
+export const COLUMN_VISIBILITY_TRIGGER = "[data-column-visibility-trigger]";
+export const COLUMN_VISIBILITY_DROPDOWN = "[data-column-visibility-dropdown]";
+export const COLUMN_VISIBILITY_LIST = "[data-column-visibility-list]";
+export const COLUMN_VISIBILITY_COUNT = "[data-column-visibility-count]";
+export const COLUMN_SELECT_ALL = "[data-column-select-all]";
+export const COLUMN_DESELECT_ALL = "[data-column-deselect-all]";

@@ -23,16 +23,18 @@
  * - onPageLoad() called on page load to reinitialize
  */
 
-import { DataStore, PaginationManager } from "./core";
+import { DataStore, PaginationManager, ColumnVisibilityManager } from "./core";
 import {
   TableRenderer,
   ToolbarRenderer,
   PaginationRenderer,
   HeaderRenderer,
+  ColumnVisibilityRenderer,
 } from "./rendering";
 import {
   PaginationEventManager,
   RowsPerPageEventManager,
+  ColumnVisibilityEventManager,
 } from "./events";
 import { UIStateManager } from "./ui";
 import { loadAndParseFile } from "./utils/dataLoader";
@@ -42,12 +44,15 @@ import { onPageLoad, onBeforeSwap } from "../../lib/pageInit";
 // Managers (instantiated in init)
 let dataStore: DataStore;
 let paginationManager: PaginationManager;
+let columnVisibilityManager: ColumnVisibilityManager;
 let tableRenderer: TableRenderer;
 let toolbarRenderer: ToolbarRenderer;
 let paginationRenderer: PaginationRenderer;
 let headerRenderer: HeaderRenderer;
+let columnVisibilityRenderer: ColumnVisibilityRenderer;
 let paginationEvents: PaginationEventManager;
 let rowsPerPageEvents: RowsPerPageEventManager;
+let columnVisibilityEvents: ColumnVisibilityEventManager;
 let uiState: UIStateManager;
 
 /**
@@ -58,12 +63,15 @@ async function initVisualizerPage(): Promise<void> {
     // Instantiate managers
     dataStore = new DataStore();
     paginationManager = new PaginationManager(CONFIG.DEFAULT_ROWS_PER_PAGE);
+    columnVisibilityManager = new ColumnVisibilityManager();
     tableRenderer = new TableRenderer();
     toolbarRenderer = new ToolbarRenderer();
     paginationRenderer = new PaginationRenderer();
     headerRenderer = new HeaderRenderer();
+    columnVisibilityRenderer = new ColumnVisibilityRenderer();
     paginationEvents = new PaginationEventManager();
     rowsPerPageEvents = new RowsPerPageEventManager();
+    columnVisibilityEvents = new ColumnVisibilityEventManager();
     uiState = new UIStateManager();
 
     // Show loading state
@@ -90,6 +98,17 @@ async function initVisualizerPage(): Promise<void> {
     // Store data
     dataStore.setData(result.file, result.columns, result.rows);
     paginationManager.setTotalRows(result.rowCount);
+    columnVisibilityManager.initFromColumns(result.columns);
+
+    // Render initial column visibility UI
+    columnVisibilityRenderer.renderList(
+      result.columns,
+      new Set(result.columns)
+    );
+    columnVisibilityRenderer.updateCount(
+      columnVisibilityManager.getVisibleCount(),
+      columnVisibilityManager.getTotalCount()
+    );
 
     // Render UI
     renderUI();
@@ -110,7 +129,7 @@ async function initVisualizerPage(): Promise<void> {
  * Render all UI components
  */
 function renderUI(): void {
-  const columns = dataStore.getColumns();
+  const columns = columnVisibilityManager.getVisibleColumns();
   const rows = dataStore.getRows();
   const filename = dataStore.getFilename();
   const currentPage = paginationManager.getCurrentPage();
@@ -167,6 +186,86 @@ function setupEvents(): void {
     paginationManager.setRowsPerPage(newValue);
     rerenderAfterPageChange();
   });
+
+  // Column visibility events
+  columnVisibilityEvents.onTriggerClick(() => {
+    const dropdown = document.querySelector(
+      "[data-column-visibility-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-column-visibility-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger) {
+      dropdown.classList.toggle("hidden");
+      trigger.setAttribute(
+        "aria-expanded",
+        dropdown.classList.contains("hidden") ? "false" : "true"
+      );
+    }
+  });
+
+  columnVisibilityEvents.onCheckboxChange((column) => {
+    const success = columnVisibilityManager.toggle(column);
+    if (success) {
+      columnVisibilityRenderer.updateCount(
+        columnVisibilityManager.getVisibleCount(),
+        columnVisibilityManager.getTotalCount()
+      );
+      renderUI();
+    }
+  });
+
+  columnVisibilityEvents.onSelectAll(() => {
+    columnVisibilityManager.setAll(true);
+    columnVisibilityRenderer.renderList(
+      dataStore.getColumns(),
+      new Set(columnVisibilityManager.getVisibleColumns())
+    );
+    columnVisibilityRenderer.updateCount(
+      columnVisibilityManager.getVisibleCount(),
+      columnVisibilityManager.getTotalCount()
+    );
+    renderUI();
+  });
+
+  columnVisibilityEvents.onDeselectAll(() => {
+    columnVisibilityManager.setAll(false);
+    columnVisibilityRenderer.renderList(
+      dataStore.getColumns(),
+      new Set(columnVisibilityManager.getVisibleColumns())
+    );
+    columnVisibilityRenderer.updateCount(
+      columnVisibilityManager.getVisibleCount(),
+      columnVisibilityManager.getTotalCount()
+    );
+    renderUI();
+  });
+
+  columnVisibilityEvents.onClickOutside(() => {
+    const dropdown = document.querySelector(
+      "[data-column-visibility-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-column-visibility-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger && !dropdown.classList.contains("hidden")) {
+      dropdown.classList.add("hidden");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  columnVisibilityEvents.onEscapeKey(() => {
+    const dropdown = document.querySelector(
+      "[data-column-visibility-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-column-visibility-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger && !dropdown.classList.contains("hidden")) {
+      dropdown.classList.add("hidden");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
 }
 
 /**
@@ -197,6 +296,7 @@ function cleanup(): void {
   // Cleanup event managers
   paginationEvents?.cleanup();
   rowsPerPageEvents?.cleanup();
+  columnVisibilityEvents?.cleanup();
 
   // Reset stores
   dataStore?.clear();
