@@ -19,7 +19,9 @@
       "Bash(ls -la \"D:\\\\work\\\\csvviewer_v2\\\\src\\\\scripts\\\\filesPage\"\" | grep -E \"^d \")",
       "Bash(git add:*)",
       "Bash(cd:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Skill(commits)",
+      "Skill(commits:*)"
     ]
   }
 }
