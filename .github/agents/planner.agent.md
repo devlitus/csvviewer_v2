@@ -31,10 +31,56 @@ El plan consiste en un documento Markdown que describe el plan de implementació
 ## Reglas estrictas
 
 1. **NUNCA escribas código fuente.** No crees ni modifiques archivos fuera de `docs/`.
-2. **Solo escribes en `docs/`.** Nombra los archivos como `docs/plan-<nombre-descriptivo>.md`.
+2. **Solo escribes en `docs/`.** Sigue la estructura de módulos definida abajo.
 3. **Analiza antes de proponer.** Lee el codebase existente para entender patrones, convenciones y stack.
 4. **Prioriza simplicidad.** Propone la solución más simple que resuelva el problema.
 5. **Usa el stack existente.** Si una librería ya resuelve el problema, no propongas agregar otra.
+
+## Estructura de Documentación en `docs/`
+
+**Patrón actual organizado por módulos:**
+
+```
+docs/
+├── README.md                          # Índice central
+├── upload/                            # Módulo: Carga de archivos
+│   ├── plan-ui.md
+│   └── plan-drag-drop-feature.md
+├── files/                             # Módulo: Gestión de archivos
+│   ├── plan-ui.md
+│   ├── plan-indexeddb-integration.md
+│   ├── plan-delete-feature.md
+│   └── plan-refactoring.md
+├── visualizer/                        # Módulo: Visualización CSV
+│   └── plan-ui.md
+└── validation/                        # Planes de validación
+    └── fase3-validation.md
+```
+
+### Dónde guardar tu plan
+
+**Determina el módulo según el contexto:**
+
+1. **`docs/upload/`** — Features de carga de archivos (drag & drop, validación, UI upload)
+2. **`docs/files/`** — Features de gestión (tabla, paginación, eliminación, refactoring)
+3. **`docs/visualizer/`** — Features de visualización (filtros, ordenamiento, exportación)
+4. **`docs/validation/`** — Checklists de validación y QA
+
+### Nomenclatura de archivos
+
+**Patrón:** `docs/<modulo>/plan-<descripcion>.md`
+
+**Ejemplos válidos:**
+- `docs/upload/plan-ui.md` ✅
+- `docs/files/plan-delete-feature.md` ✅
+- `docs/visualizer/plan-export-excel.md` ✅
+- `docs/validation/fase2-validation.md` ✅
+
+### Si la carpeta del módulo no existe
+
+1. Verifica que el módulo no está ya en una de las carpetas existentes
+2. Si necesitas un módulo nuevo, **coordina con el usuario** antes de crear la carpeta
+3. Si el usuario confirma: `mkdir -p docs/<nuevo-modulo>` y luego crea el archivo plan
 
 ## Contexto del proyecto
 

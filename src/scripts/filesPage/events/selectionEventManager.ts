@@ -31,18 +31,20 @@ export class SelectionEventManager {
     const changeHandler: EventListener = (e: Event) => {
       const target = e.target as HTMLElement;
 
+      // Only process checkbox inputs
+      if (!(target instanceof HTMLInputElement) || target.type !== "checkbox") {
+        return;
+      }
+
       // Check for select-all checkbox first
-      const selectAllCheckbox = target.closest("[data-select-all-checkbox]");
-      if (selectAllCheckbox) {
-        const checked = (selectAllCheckbox as HTMLInputElement).checked;
-        this.notifySelectAllChange(checked);
+      if (target.hasAttribute("data-select-all-checkbox")) {
+        this.notifySelectAllChange(target.checked);
         return;
       }
 
       // Check for individual file checkbox
-      const fileCheckbox = target.closest("[data-file-checkbox]");
-      if (fileCheckbox) {
-        const fileId = (fileCheckbox as HTMLInputElement).value;
+      if (target.hasAttribute("data-file-checkbox")) {
+        const fileId = target.value;
         if (fileId) {
           this.notifyCheckboxChange(fileId);
         }

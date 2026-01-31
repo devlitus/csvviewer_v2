@@ -1,0 +1,45 @@
+---
+interface Props {
+  fileName?: string;
+}
+
+const { fileName = "Loading..." } = Astro.props as Props;
+---
+
+<header
+  class="flex items-center justify-between h-16 px-8 border-b border-border-dark shrink-0"
+>
+  <!-- Breadcrumb -->
+  <nav aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-text-light-gray">
+      <li>
+        <a
+          href="/"
+          class="flex items-center gap-1 hover:text-text-off-white transition-colors"
+        >
+          <span class="material-symbols-outlined text-xl">home</span>
+        </a>
+      </li>
+      <li aria-hidden="true">/</li>
+      <li>
+        <a href="/" class="hover:text-text-off-white transition-colors">Home</a>
+      </li>
+      <li aria-hidden="true">/</li>
+      <li class="text-text-off-white font-medium" data-filename>{fileName}</li>
+    </ol>
+  </nav>
+
+  <!-- Search bar -->
+  <div
+    class="flex items-center gap-2 bg-surface-card rounded-lg px-4 py-2 border border-border-dark"
+  >
+    <span class="material-symbols-outlined text-text-light-gray">search</span>
+    <input
+      type="text"
+      placeholder="Search application"
+      aria-label="Search application"
+      class="bg-transparent text-text-off-white placeholder-text-light-gray outline-none w-48 opacity-60 cursor-not-allowed"
+      disabled
+    />
+  </div>
+</header>

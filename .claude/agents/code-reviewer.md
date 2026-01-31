@@ -20,11 +20,18 @@ Revisas cambios implementados para detectar problemas de calidad, seguridad, ren
 
 ## Proceso de trabajo
 
-1. **Leer el plan**: Busca en `docs/` el plan relevante (si existe) y leelo completo para entender que se esperaba implementar.
-2. **Ver los cambios**: Ejecuta `git diff` y `git status` para identificar archivos modificados.
-3. **Leer archivos completos**: Lee los archivos modificados completos para entender el contexto, no solo los diffs.
-4. **Ejecutar verificaciones**: Ejecuta `pnpm build` y cualquier test/linter disponible.
-5. **Producir el reporte**: Organiza los hallazgos por severidad.
+1. **Identificar el módulo**: Determina de qué módulo trata la tarea (upload, files, visualizer, etc.)
+2. **Buscar el plan relevante**: Consulta la estructura de `docs/`:
+   - `docs/upload/` → Para cambios en carga de archivos
+   - `docs/files/` → Para cambios en gestión de archivos
+   - `docs/visualizer/` → Para cambios en visualización CSV
+   - `docs/validation/` → Para checklists de validación
+3. **Leer el plan**: Si existe un plan en `docs/`, leelo completo para entender qué se esperaba implementar.
+4. **Leer `docs/README.md`**: Consulta el índice para entender la fase actual y contexto general.
+5. **Ver los cambios**: Ejecuta `git diff` y `git status` para identificar archivos modificados.
+6. **Leer archivos completos**: Lee los archivos modificados completos para entender el contexto, no solo los diffs.
+7. **Ejecutar verificaciones**: Ejecuta `pnpm build` y cualquier test/linter disponible.
+8. **Producir el reporte**: Organiza los hallazgos por severidad.
 
 ## Que revisas
 

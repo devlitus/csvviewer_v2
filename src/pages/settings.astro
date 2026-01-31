@@ -1,0 +1,167 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+import SettingsSection from "../components/settings/SettingsSection.astro";
+import SettingsInput from "../components/settings/SettingsInput.astro";
+import SettingsSelect from "../components/settings/SettingsSelect.astro";
+import ThemeSelector from "../components/settings/ThemeSelector.astro";
+import ProfileAvatar from "../components/settings/ProfileAvatar.astro";
+import ToggleSwitch from "../components/settings/ToggleSwitch.astro";
+import DangerZone from "../components/settings/DangerZone.astro";
+---
+
+<AppLayout title="Settings" contentClass="flex-1 overflow-y-auto px-8 py-8">
+  <div class="max-w-4xl mx-auto flex flex-col gap-8 pb-10">
+    <!-- Page header -->
+    <div class="flex flex-col gap-2">
+      <h1 class="text-3xl font-black text-text-off-white tracking-tight">
+        Settings
+      </h1>
+      <p class="text-base text-text-light-gray max-w-2xl">
+        Manage your account preferences, security settings, and data
+        configurations.
+      </p>
+    </div>
+
+    <!-- Profile Settings Section -->
+    <SettingsSection title="Profile Settings" icon="person">
+      <div class="flex flex-col md:flex-row items-start gap-8">
+        <!-- Avatar -->
+        <ProfileAvatar name="Alex Morgan" />
+
+        <!-- Form fields -->
+        <div class="flex-1 w-full grid gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <SettingsInput
+              label="Full Name"
+              type="text"
+              value="Alex Morgan"
+              id="input-fullname"
+            />
+            <SettingsInput
+              label="Email Address"
+              type="email"
+              value="alex@dataflow.io"
+              id="input-email"
+            />
+          </div>
+          <div class="flex justify-end pt-2">
+            <button
+              class="px-5 py-2.5 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg text-sm font-semibold transition-all shadow-lg shadow-vibrant-blue/10"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </SettingsSection>
+
+    <!-- Preferences Section -->
+    <SettingsSection title="Preferences" icon="tune">
+      <div class="grid gap-6">
+        <ThemeSelector />
+
+        <div class="max-w-md">
+          <SettingsSelect
+            label="Language"
+            icon="language"
+            id="select-language"
+            options={[
+              { value: "en-us", text: "English (United States)" },
+              { value: "es", text: "Spanish (Español)" },
+              { value: "fr", text: "French (Français)" },
+              { value: "de", text: "German (Deutsch)" },
+            ]}
+            selected="en-us"
+          />
+        </div>
+      </div>
+    </SettingsSection>
+
+    <!-- Security Section -->
+    <SettingsSection title="Security" icon="security">
+      <div class="space-y-6">
+        <!-- Password -->
+        <div
+          class="flex items-center justify-between pb-6 border-b border-border-dark/50"
+        >
+          <div>
+            <h3 class="text-base font-semibold text-text-off-white">
+              Password
+            </h3>
+            <p class="text-sm text-text-light-gray mt-1">
+              Last changed 3 months ago
+            </p>
+          </div>
+          <button
+            class="px-4 py-2 border border-border-dark hover:bg-white/5 hover:border-text-light-gray text-text-off-white rounded-lg text-sm font-medium transition-colors"
+          >
+            Change Password
+          </button>
+        </div>
+
+        <!-- Two-Factor Authentication -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-semibold text-text-off-white">
+              Two-Factor Authentication
+            </h3>
+            <p class="text-sm text-text-light-gray mt-1">
+              Secure your account with 2FA
+            </p>
+          </div>
+          <ToggleSwitch id="2fa-toggle" checked={false} />
+        </div>
+      </div>
+    </SettingsSection>
+
+    <!-- Data Management Section -->
+    <SettingsSection title="Data Management" icon="database">
+      <div class="space-y-6">
+        <!-- Default Export Format -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-semibold text-text-off-white">
+              Default Export Format
+            </h3>
+            <p class="text-sm text-text-light-gray mt-1">
+              Preferred format for data downloads
+            </p>
+          </div>
+          <div class="relative w-48">
+            <SettingsSelect
+              label=""
+              id="select-export-format"
+              options={[
+                { value: "csv", text: "CSV (.csv)" },
+                { value: "json", text: "JSON (.json)" },
+                { value: "xlsx", text: "Excel (.xlsx)" },
+              ]}
+              selected="csv"
+            />
+          </div>
+        </div>
+
+        <!-- Auto-save Projects -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-semibold text-text-off-white">
+              Auto-save Projects
+            </h3>
+            <p class="text-sm text-text-light-gray mt-1">
+              Save changes every 5 minutes
+            </p>
+          </div>
+          <ToggleSwitch id="autosave-toggle" checked={true} />
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="pt-6 border-t border-border-dark/50">
+          <DangerZone />
+        </div>
+      </div>
+    </SettingsSection>
+
+    <!-- Spacing at the end -->
+    <div class="h-8"></div>
+  </div>
+</AppLayout>

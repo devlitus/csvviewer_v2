@@ -1,161 +1,431 @@
 # GitHub Copilot Instructions - CSV Viewer v2
 
-## Project Overview
-Client-side CSV viewer built with **Astro 5 + TypeScript (strict) + Tailwind CSS 4**. SSR-enabled with Vercel adapter but all data operations happen in-browser via IndexedDB—no backend API.
+## 🎯 Descripción General del Proyecto
 
-**Always respond in Spanish** when communicating with the user.
+**CSV Viewer v2** es una aplicación web **100% client-side** para visualizar, gestionar y exportar archivos CSV.
 
-## Architecture & Data Flow
+| Aspecto | Detalles |
+|--------|----------|
+| **Framework** | Astro 5 + TypeScript (strict) |
+| **Estilos** | Tailwind CSS 4 con tokens dark |
+| **Persistencia** | IndexedDB (sin backend ni API) |
+| **Interfaz** | Dark mode, responsive, componentes modulares |
+| **Hosting** | SSR-ready con Vercel adapter |
+| **Estado** | Fase 3 en progreso (Visualizer) |
 
-### Client-Side Storage Pattern
-**Critical**: All CSV files persist in IndexedDB (`CSVViewerDB` store), not on a server. The data flow is:
-1. User uploads CSV → `saveFile()` writes to IndexedDB with `crypto.randomUUID()` ID
-2. Pages load files via `getAllFiles()` or `getFile(id)` 
-3. Deletion uses `deleteFiles(ids)` with batch support
-4. CSV parsing happens client-side with custom `parseCSVString()` parser (handles quotes, multiline, escape sequences)
+**Idioma:** Responde siempre en español cuando comuniques con el usuario.
 
-### Key Libraries
-- `src/lib/indexeddb.ts`: Promise-based IndexedDB API (`saveFile`, `getFile`, `getAllFiles`, `deleteFiles`)
-- `src/lib/csvParser.ts`: Custom CSV parser with proper quote/escape handling (NO external libraries like `csv-parse` used here)
-- `src/lib/fileUpload.ts`: Validation logic (50MB max, `.csv` only)
-- `src/lib/types.ts`: Core types (`CSVFile`, `CSVParseResult`, `ValidationResult`, `UploadResult`)
+---
 
-### Component Organization
+## 🏗️ Arquitectura & Flujo de Datos
+
+### Patrón de Almacenamiento Client-Side
+
+**CRÍTICO:** Todos los archivos CSV se guardan en **IndexedDB** (`CSVViewerDB`), NO en un servidor:
+
+```
+┌─────────────────────────────────────────┐
+│        USER ACTION (Browser)             │
+└─────────────────────────────────────────┘
+         ↓                    ↓
+    Upload CSV         Browse Archivos
+         ↓                    ↓
+   validateFile()      getAllFiles()
+         ↓                    ↓
+   parseCSVString()    getFile(id)
+         ↓                    ↓
+  saveFile() to        Renderizar
+  IndexedDB            Tabla
+         ↓                    ↓
+  Actualizar           ¿Visualizar?
+  RecentFiles              ↓
+                     /visualizer?file=id
+                            ↓
+                     CSVTable + Filtros
+                            ↓
+                       Exportar CSV/Excel
+```
+
+### IndexedDB API (`src/lib/indexeddb.ts`)
+
+Promise-based, todas retornan Promise:
+
+```typescript
+// Guardar archivo
+saveFile(csvFile: CSVFile): Promise<string>  // Retorna UUID
+
+// Obtener uno
+getFile(id: string): Promise<CSVFile | undefined>
+
+// Obtener todos
+getAllFiles(): Promise<CSVFile[]>
+
+// Eliminar lote
+deleteFiles(ids: string[]): Promise<void>
+```
+
+**Tipo `CSVFile`:**
+```typescript
+{
+  id: string              // UUID generado con crypto.randomUUID()
+  filename: string        // Nombre original
+  content: string         // CSV raw (completo)
+  size: number           // Bytes
+  uploadDate: number     // Timestamp
+  rowCount?: number      // Opcional
+}
+```
+
+### Parser CSV (`src/lib/csvParser.ts`)
+
+**Usar SIEMPRE `parseCSVString()`, NO `csv-parse` library:**
+
+```typescript
+parseCSVString(content: string): CSVParseResult
+
+// Retorna:
+{
+  data: Record<string, string>[]  // Array de rows (obj con keys = columnas)
+  rowCount: number
+  error?: string
+}
+```
+
+**Características:**
+- ✅ Maneja comillas entrecomilladas correctamente
+- ✅ Soporta multiline dentro de campos
+- ✅ Escape sequences (`\"`, `\\`)
+- ✅ No requiere librerías externas
+- ✅ Parser custom, ligero y rápido
+
+### Validación (`src/lib/fileUpload.ts`)
+
+```typescript
+validateFile(file: File): ValidationResult
+
+// Validaciones:
+- Extensión .csv (case-insensitive)
+- Tamaño ≤ 50MB
+- Tipo MIME text/csv (recomendado)
+
+// Retorna:
+{ valid: boolean, error?: string }
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+### `src/lib/` — Lógica Reutilizable
+
+| Archivo | Propósito |
+|---------|-----------|
+| `types.ts` | Tipos TypeScript compartidos |
+| `indexeddb.ts` | API IndexedDB con CRUD completo |
+| `csvParser.ts` | Parser CSV custom |
+| `fileUpload.ts` | Validación de archivos |
+| `formatters.ts` | Formateo (fechas, tamaños) |
+| `htmlUtils.ts` | Utilidades HTML |
+| `pageInit.ts` | Inicialización de páginas |
+
+### `src/scripts/` — Scripts Client-Side
+
+| Archivo | Página | Responsabilidad |
+|---------|--------|-----------------|
+| `uploadPage.ts` | `/` | Drag & drop, upload, vista recientes |
+| `filesPage.ts` | `/files` | Tabla, paginación, eliminación (568 líneas) |
+| `filesPage/` | `/files` | Módulos modularizados (core, delete, events, rendering, utils) |
+
+### `src/components/` — Componentes Astro
+
+**Organización por dominio:**
+
 ```
 components/
-├── ui/          # Generic components (Button, SearchInput, ConfirmationModal)
-├── layout/      # Structure (Header, Sidebar, MainContent)
-├── navigation/  # Nav components (Logo, NavMenu, NavItem)
-├── upload/      # UploadZone with drag & drop
-├── files/       # File management (FileTable, Pagination, RecentFiles)
-└── visualizer/  # CSV display (CSVTable, DataToolbar, CategoryBadge)
+├── ui/                                # Genéricos reutilizables
+│   ├── Button.astro
+│   ├── SearchInput.astro
+│   ├── ConfirmationModal.astro
+│   └── [otros]
+├── layout/                            # Estructura principal
+│   ├── PageHeader.astro
+│   └── Sidebar.astro
+├── navigation/                        # Navegación
+│   └── NavItem.astro
+├── upload/                            # Feature: Upload
+│   └── UploadZone.astro               # Drag & drop, input file
+├── files/                             # Feature: Gestión de Archivos
+│   ├── FileTable.astro
+│   ├── FileTableRow.astro
+│   ├── FileIcon.astro
+│   ├── StatusBadge.astro
+│   ├── Pagination.astro
+│   ├── RecentFileCard.astro
+│   ├── RecentFilesSection.astro
+│   └── SelectionBar.astro
+└── visualizer/                        # Feature: Visualización CSV
+    ├── CSVTable.astro
+    ├── CSVTableHeader.astro
+    ├── CSVTableRow.astro
+    ├── DataToolbar.astro
+    ├── ColumnFilterInput.astro
+    ├── FilterButton.astro
+    ├── ExportButton.astro
+    ├── CategoryBadge.astro
+    ├── TablePagination.astro
+    └── VisualizerHeader.astro
 ```
 
-### Page Routes
-- `/` (index.astro): Upload zone + recent files
-- `/files`: File management with pagination/batch delete
-- `/visualizer?file=<id>`: CSV display with column filters/export
-- `/settings`: Configuration (future)
+### `src/pages/` — Rutas Astro
 
-## Code Conventions
+```
+pages/
+├── index.astro           # / — Upload + archivos recientes
+├── files.astro           # /files — Gestión de archivos
+├── visualizer.astro      # /visualizer?file=<id> — Visualización
+└── settings.astro        # /settings — Configuración (futura)
+```
 
-### File Naming
-- **Components**: `PascalCase.astro` (e.g., `FileTable.astro`, `RecentFileCard.astro`)
-- **Utils/Scripts**: `camelCase.ts` (e.g., `csvParser.ts`, `indexeddb.ts`)
-- **Page Scripts**: `camelCase.ts` in `src/scripts/` (e.g., `uploadPage.ts`)
+### `docs/` — Documentación de Planes (Reorganizada)
 
-### Component Structure
+```
+docs/
+├── README.md                          # Índice central
+├── upload/
+│   ├── plan-ui.md
+│   └── plan-drag-drop-feature.md
+├── files/
+│   ├── plan-ui.md
+│   ├── plan-indexeddb-integration.md
+│   ├── plan-delete-feature.md
+│   └── plan-refactoring.md
+├── visualizer/
+│   └── plan-ui.md
+└── validation/
+    └── fase3-validation.md
+```
+
+---
+
+## 💻 Convenciones de Código
+
+### Nomenclatura de Archivos
+
+| Tipo | Patrón | Ejemplo |
+|------|--------|---------|
+| **Componentes Astro** | `PascalCase.astro` | `FileTable.astro`, `ExportButton.astro` |
+| **Utilidades/Lib** | `camelCase.ts` | `csvParser.ts`, `indexeddb.ts` |
+| **Scripts de página** | `camelCase.ts` en `src/scripts/` | `uploadPage.ts`, `filesPage.ts` |
+| **Módulos** | `camelCase.ts` en carpetas | `tableRenderer.ts`, `deleteEventManager.ts` |
+| **Tipos centrales** | `types.ts` | `src/lib/types.ts` |
+
+### Estructura de Componentes Astro
+
 ```astro
 ---
-// 1. Type imports first
+// 1. Type imports primero
 import type { CSVFile } from "../lib/types";
 
 // 2. External dependencies
 import { ViewTransitions } from "astro:transitions";
 
-// 3. Local components/utils (hierarchical: layouts → components → utils)
+// 3. Local imports (jerarquía: layouts → components → utils)
 import AppLayout from "../layouts/AppLayout.astro";
-import FileTable from "../components/files/FileTable.astro";
+import Button from "../components/ui/Button.astro";
 import { getAllFiles } from "../lib/indexeddb";
 
-// 4. Props interface at the top
+// 4. Props interface
 interface Props {
   variant?: 'primary' | 'secondary';
   className?: string;
+  onDelete?: (id: string) => Promise<void>;
 }
 
-// 5. Destructure with defaults
+// 5. Destructure con defaults
 const { variant = 'primary', className = '' } = Astro.props as Props;
 ---
 
-<!-- HTML structure -->
+<!-- HTML -->
 <div class={`base-styles ${className}`}>
-  <!-- Use class: className pattern for passing CSS classes -->
+  <slot />
 </div>
 ```
 
 ### TypeScript Patterns
-- **Function declarations** for top-level functions: `function parseCSVString(content: string): CSVParseResult`
-- **Arrow functions** for callbacks/event handlers: `button.addEventListener('click', () => { ... })`
-- **Explicit return types** on all public functions
-- **`Record<string, string>`** for dynamic object keys (CSV rows use this pattern)
 
-### Styling Approach
-- **Tailwind-first**: Use utility classes, not custom CSS unless absolutely necessary
-- **Design tokens** in `src/styles/global.css` via `@theme` directive:
-  ```css
-  --color-primary: #007AFF
-  --color-vibrant-blue: #3B82F6
-  --color-surface-dark: #1A1C1E
-  --color-text-off-white: #F5F5F7
-  ```
-- **Hover states**: Use `hover:` prefix consistently (e.g., `hover:bg-primary-hover`, `hover:text-vibrant-blue`)
-- **Transitions**: Add `transition-all` or `transition-colors` for smooth interactions
+```typescript
+// ✅ CORRECTO: función con tipos explícitos
+function parseCSVString(content: string): CSVParseResult {
+  return { data, rowCount, error };
+}
 
-### Client-Side Scripts
-Scripts in `src/scripts/` handle page-specific interactivity:
-- Use data attributes for DOM selection: `[data-upload-zone]`, `[data-recent-files-grid]`
-- Store idle state HTML for resets: `const IDLE_STATE_HTML = element.innerHTML`
-- Event delegation for dynamic elements (e.g., file cards loaded from IndexedDB)
-- Example from `uploadPage.ts`:
-  ```typescript
-  const uploadZone = document.querySelector(UPLOAD_ZONE_SELECTOR);
-  uploadZone?.addEventListener('dragover', (e) => { e.preventDefault(); });
-  ```
+// ✅ CORRECTO: arrow functions en callbacks
+button.addEventListener('click', () => {
+  handleDelete(fileId);
+});
 
-## Development Workflow
+// ✅ CORRECTO: tipos dinámicos con Record
+const row: Record<string, string> = { name: 'John', email: 'john@example.com' };
 
-### Commands
-```bash
-pnpm install  # Install dependencies
-pnpm dev      # Start dev server at localhost:4321
-pnpm build    # Build for production
-pnpm preview  # Preview production build
+// ❌ INCORRECTO: función sin tipos
+function parse(content) { ... }
+
+// ❌ INCORRECTO: any type
+const data: any = { ... };
 ```
 
-### Commits
-- Use `pnpm commit` which runs a Conventional Commits interactive script
-- Format: `<type>(<scope>): <description>` (e.g., `feat(upload): add drag-drop support`)
-- The script is defined in package.json but implementation is in `.claude/skills/commits/`
+### Estilos con Tailwind
 
-### Design Reference
-- UI mockups in `/desing/*` folders (note the typo: "desing" not "design")
-- Planning docs in `/docs/` (e.g., `plan-upload-ui.md`, `plan-drag-drop-feature.md`)
-- Check these before implementing new features
+**Preferencia:** Utilities > Design tokens > Custom CSS
 
-## Integration Points
+```astro
+<!-- ✅ CORRECTO: Tailwind utilities -->
+<button class="bg-primary hover:bg-primary-hover transition-colors px-4 py-2 rounded">
+  Click
+</button>
+
+<!-- ✅ CORRECTO: Design tokens de global.css -->
+<div class="bg-surface-dark border border-border-dark">
+  Contenido
+</div>
+
+<!-- ❌ INCORRECTO: CSS inline masivo -->
+<button class="custom-btn">Click</button>
+<style>
+  .custom-btn { background: #007AFF; padding: 8px 16px; ... }
+</style>
+```
+
+**Design Tokens (en `src/styles/global.css`):**
+```css
+--color-primary: #007AFF
+--color-vibrant-blue: #3B82F6
+--color-surface-dark: #1A1C1E
+--color-surface-card: #24272B
+--color-text-off-white: #F5F5F7
+--color-text-light-gray: #A1A1AA
+--color-border-dark: #2D2F36
+--color-background-dark: #121212
+```
+
+### Selección DOM en Scripts
+
+```typescript
+// ✅ CORRECTO: usar data attributes
+const element = document.querySelector('[data-file-id="123"]');
+const rows = document.querySelectorAll('[data-file-row]');
+
+rows.forEach(row => {
+  row.addEventListener('click', (e) => {
+    const fileId = (e.target as HTMLElement)
+      .closest('[data-file-row]')
+      ?.getAttribute('data-file-id');
+  });
+});
+
+// ❌ INCORRECTO: IDs globales, clases para lógica
+const element = document.getElementById('fileRow123');
+document.querySelectorAll('.file-item').forEach(...);
+```
+
+### Commits (Conventional Commits)
+
+Usar `pnpm commit` para flujo interactivo:
+
+```
+type(scope): descripción
+
+Cuerpo detallado (opcional).
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+```
+
+**Tipos válidos:**
+- `feat` — Nueva funcionalidad
+- `fix` — Corrección de bug
+- `refactor` — Reorganización sin cambios funcionales
+- `docs` — Cambios en documentación
+- `style` — Formato, linting (no afecta funcionalidad)
+- `chore` — Dependencias, configuración
+- `test` — Tests
+- `ci` — CI/CD
+
+**Scopes válidos:**
+- `upload`, `files`, `visualizer` — Features
+- `ui`, `layout`, `nav` — Componentes
+- `lib`, `parser`, `db` — Utilidades
+- `styles`, `build`, `docs`, `types` — Otros
+
+---
+
+## 🔧 Flujo de Desarrollo
+
+### Comandos
+
+```bash
+pnpm install    # Instalar dependencias
+pnpm dev        # Servidor dev http://localhost:4321
+pnpm build      # Build producción → ./dist/
+pnpm preview    # Previsualizar build
+pnpm commit     # Commits interactivos (Conventional Commits)
+```
+
+### Documentación
+
+**Consulta SIEMPRE estos archivos ANTES de empezar:**
+- [`.claude/CLAUDE.md`](./../.claude/CLAUDE.md) — Guía completa del proyecto
+- [`docs/README.md`](./../docs/README.md) — Índice de planes
+- [`desing/`](./../desing/) — Mockups de UI (nota: typo intencional)
+
+### Diseños de Referencia
+
+Los diseños visuales están en `/desing/`:
+- `csv_processor_home_and_upload_upload/` — UploadZone
+- `csv_processor_home_and_upload_files/` — Tabla de archivos
+- `csv_processor_home_and_upload_visualizer/` — Visualización CSV
+- `csv_processor_home_and_upload_settings/` — Settings (futura)
+
+---
+
+## 🔗 Patrones de Integración
 
 ### Astro View Transitions
-- Enabled via `<ViewTransitions />` in `Layout.astro`
-- Pages feel like SPA navigation without full reloads
-- Be aware of script re-execution on page transitions
+
+- Habilitado en `Layout.astro` con `<ViewTransitions />`
+- Navegación sin full reloads (UX tipo SPA)
+- Ten cuidado con re-ejecución de scripts en transiciones
 
 ### Material Symbols Icons
-- Loaded from Google Fonts CDN in `Layout.astro`
-- Usage: `<span class="material-symbols-outlined">cloud_upload</span>`
-- Common icons: `table_view`, `upload`, `delete`, `settings`
 
-## Common Patterns
+- Cargado desde Google Fonts CDN en `Layout.astro`
+- Uso: `<span class="material-symbols-outlined">cloud_upload</span>`
+- Iconos comunes: `table_view`, `upload`, `delete`, `settings`, `more_vert`
 
-### Loading Files in Pages
+---
+
+## 📋 Patrones Comunes
+
+### Cargar Archivos en Páginas
+
 ```typescript
-// In .astro frontmatter
+// ❌ NO: Frontend en Astro frontmatter
 import { getAllFiles } from "../lib/indexeddb";
-// This won't work server-side! Use client script instead:
+const files = await getAllFiles();  // ¡No funciona server-side!
 ```
+
 ```astro
-<!-- Correct approach -->
+<!-- ✅ SÍ: Script client-side -->
 <div data-recent-files-grid></div>
 <script>
   import { getAllFiles } from "../lib/indexeddb";
   const grid = document.querySelector('[data-recent-files-grid]');
   const files = await getAllFiles();
-  // Render dynamically
+  // Renderizar dinámicamente
 </script>
 ```
 
-### CSV Validation
-Always validate before parsing:
+### Validar CSV
+
 ```typescript
 import { validateFile } from "../lib/fileUpload";
 const validation = validateFile(file);
@@ -165,21 +435,54 @@ if (!validation.valid) {
 }
 ```
 
-### Error Handling UI
-- Show errors in dedicated error zones (e.g., `[data-upload-error]`)
-- Auto-hide errors after 5 seconds using `setTimeout`
-- Use red color scheme: `bg-red-500/10 border-red-500/30 text-red-400`
+### Manejo de Errores en UI
 
-## What NOT to Do
-- ❌ Don't create API routes—this is a client-only app
-- ❌ Don't use `csv-parse` library for parsing—use custom `parseCSVString()`
-- ❌ Don't access IndexedDB in Astro frontmatter (runs server-side)
-- ❌ Don't inline massive CSS—use Tailwind utilities
-- ❌ Don't forget `type` imports: `import type { CSVFile }`
+- Mostrar errores en zonas dedicadas: `[data-upload-error]`
+- Auto-ocultar después de 5s con `setTimeout`
+- Usar esquema rojo: `bg-red-500/10 border-red-500/30 text-red-400`
 
-## Quick Reference
-- **Main IndexedDB operations**: `saveFile()`, `getFile(id)`, `getAllFiles()`, `deleteFiles(ids[])`
-- **CSV parsing**: `parseCSVString(content)` returns `{ data, rowCount, error? }`
-- **File validation**: `validateFile(file)` returns `{ valid, error? }`
-- **Type definitions**: All in `src/lib/types.ts`
-- **Design system**: Colors defined in `src/styles/global.css` `@theme` block
+---
+
+## ❌ Restricciones Críticas
+
+| Restricción | Razón | Alternativa |
+|------------|-------|-------------|
+| Crear rutas API (`/api/...`) | Es cliente-only, sin backend | Todo en IndexedDB client-side |
+| Usar `csv-parse` library | Proyecto usa custom parser | Usar `parseCSVString()` de `lib/csvParser.ts` |
+| Acceder IndexedDB en Astro frontmatter | Frontmatter es server-side | Usar `<script>` o `src/scripts/` |
+| Crear estado global (store) | No hay necesidad | Usar props, variables locales, o IndexedDB |
+| Inline CSS masivo | Dificulta mantenimiento | Usar Tailwind utilities + `global.css` |
+| Ciclado de imports | Rompe módulos | Respetar jerarquía: lib → components → pages |
+
+---
+
+## ✅ Quick Reference
+
+### IndexedDB
+- `saveFile(csvFile)` → Promise<string> (retorna UUID)
+- `getFile(id)` → Promise<CSVFile | undefined>
+- `getAllFiles()` → Promise<CSVFile[]>
+- `deleteFiles(ids)` → Promise<void>
+
+### CSV Parsing
+- `parseCSVString(content)` → { data: Record<string, string>[], rowCount: number, error?: string }
+
+### Validación
+- `validateFile(file)` → { valid: boolean, error?: string }
+
+### Tipos Principales
+- `CSVFile` — Estructura de archivo
+- `CSVParseResult` — Resultado del parser
+- `ValidationResult` — Validación de archivo
+- `UploadResult` — Resultado de subida
+
+### Diseño de Sistema
+- **Colores:** Definidos en `src/styles/global.css` `@theme` block
+- **Tipografía:** Inter (cargada en `Layout.astro`)
+- **Breakpoints:** Tailwind defaults
+- **Iconos:** Material Symbols
+
+---
+
+**Estado Actual:** Fase 3 en progreso (Visualizer)
+**Última actualización:** 30/01/2026

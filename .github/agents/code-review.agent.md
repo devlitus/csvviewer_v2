@@ -6,7 +6,7 @@ model: Claude Sonnet 4
 handoffs:
   - label: Corregir Problemas
     agent: Implementer
-    prompt: Corrige los problemas reportados arriba.
+    prompt: Corrige los problemas reportados por Code Reviewer.
     send: true
 ---
 
@@ -18,11 +18,18 @@ Responde siempre en español.
 
 ## Proceso de trabajo
 
-1. **Leer el plan**: Busca en `docs/` el plan relevante para entender qué se esperaba implementar.
-2. **Ver los cambios**: Usa `git diff` y `git status` para identificar archivos modificados.
-3. **Leer archivos completos**: Lee los archivos modificados para entender el contexto completo.
-4. **Ejecutar verificaciones**: Ejecuta `pnpm build` y cualquier test/linter disponible.
-5. **Producir el reporte**: Organiza los hallazgos por severidad.
+1. **Identificar el módulo**: Determina de qué módulo trata (upload, files, visualizer, validation).
+2. **Buscar el plan relevante**: Consulta `docs/` según el módulo:
+   - `docs/upload/` → Para cambios en carga
+   - `docs/files/` → Para cambios en gestión
+   - `docs/visualizer/` → Para cambios en visualización
+   - `docs/validation/` → Para cambios en validación
+3. **Leer el plan**: Si existe, léelo para entender qué se esperaba implementar.
+4. **Leer `docs/README.md`**: Consulta el índice para contexto general.
+5. **Ver los cambios**: Usa `git diff` y `git status` para identificar archivos modificados.
+6. **Leer archivos completos**: Lee los archivos modificados para entender el contexto completo.
+7. **Ejecutar verificaciones**: Ejecuta `pnpm build` y cualquier test/linter disponible.
+8. **Producir el reporte**: Organiza los hallazgos por severidad.
 
 ## Reglas estrictas
 
@@ -37,6 +44,9 @@ Responde siempre en español.
 * **Rendimiento**: Iteraciones innecesarias, imports pesados, operaciones bloqueantes.
 * **Consistencia**: Patrones y convenciones del proyecto, nombrado consistente.
 * **Build y tests**: Que `pnpm build` pase sin errores.
+* **Requisitos del plan**: Que todo lo planeado esté implementado correctamente.
+* **Buenas prácticas**: Uso adecuado de TypeScript, manejo de errores, comentarios útiles.
+* **Comentarios**: Que expliquen el "por qué", no el "qué" y lops que no aporen valor pedir que se eliminen.
 
 ## Formato del reporte
 

@@ -1,0 +1,31 @@
+---
+interface Props {
+  src?: string;
+  alt?: string;
+  name?: string;
+}
+
+const {
+  src = "/images/avatar-default.svg",
+  alt = "User avatar profile picture",
+  name = "User",
+} = Astro.props as Props;
+---
+
+<div class="shrink-0 relative group cursor-pointer">
+  <div
+    class="size-24 rounded-full bg-cover bg-center border-4 border-background-dark shadow-xl"
+    style={`background-image: url("${src}")`}
+  >
+  </div>
+  <!-- Hover overlay with camera icon -->
+  <div
+    class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+    role="button"
+    aria-label={`Change avatar for ${name}`}
+  >
+    <span class="material-symbols-outlined text-white" style="font-size: 28px;">
+      photo_camera
+    </span>
+  </div>
+</div>

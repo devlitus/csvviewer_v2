@@ -1,0 +1,75 @@
+---
+interface Props {
+  currentPage?: number;
+  totalPages?: number;
+}
+
+const { currentPage = 1, totalPages = 24 } = Astro.props as Props;
+---
+
+<div
+  class="border-t border-border-dark bg-surface-card p-3 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0"
+  data-pagination-container
+>
+  <!-- Left side: Rows per page -->
+  <div class="flex items-center gap-3 text-xs text-text-light-gray">
+    <label for="rows-per-page" class="text-text-light-gray"
+      >Rows per page:</label
+    >
+    <select
+      id="rows-per-page"
+      data-rows-per-page
+      class="bg-background-dark border border-border-dark rounded-lg px-3 py-1.5 text-text-off-white text-sm outline-none focus:border-vibrant-blue transition-colors cursor-pointer"
+    >
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50" selected>50</option>
+    </select>
+  </div>
+
+  <!-- Right side: Pagination controls -->
+  <div class="flex items-center gap-1">
+    <button
+      data-pagination-first
+      class="p-1 rounded hover:bg-white/10 transition-colors text-text-light-gray hover:text-text-off-white disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-label="First page"
+    >
+      <span class="material-symbols-outlined text-sm">first_page</span>
+    </button>
+
+    <button
+      data-pagination-prev
+      class="p-1 rounded hover:bg-white/10 transition-colors text-text-light-gray hover:text-text-off-white disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-label="Previous page"
+    >
+      <span class="material-symbols-outlined text-sm">chevron_left</span>
+    </button>
+
+    <span
+      class="px-3 py-1 text-xs text-text-light-gray min-w-20 text-center"
+      role="status"
+      aria-live="polite"
+      aria-label="Current page information"
+    >
+      Page <span data-current-page>{currentPage}</span> of <span
+        data-total-pages>{totalPages}</span
+      >
+    </span>
+
+    <button
+      data-pagination-next
+      class="p-1 rounded hover:bg-white/10 transition-colors text-text-light-gray hover:text-text-off-white disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-label="Next page"
+    >
+      <span class="material-symbols-outlined text-sm">chevron_right</span>
+    </button>
+
+    <button
+      data-pagination-last
+      class="p-1 rounded hover:bg-white/10 transition-colors text-text-light-gray hover:text-text-off-white disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-label="Last page"
+    >
+      <span class="material-symbols-outlined text-sm">last_page</span>
+    </button>
+  </div>
+</div>

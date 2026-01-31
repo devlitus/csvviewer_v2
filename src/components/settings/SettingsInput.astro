@@ -1,0 +1,35 @@
+---
+interface Props {
+  label: string;
+  type?: "text" | "email" | "password";
+  value?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  id?: string;
+}
+
+const {
+  label,
+  type = "text",
+  value = "",
+  placeholder = "",
+  disabled = false,
+  id = `input-${Math.random().toString(36).substr(2, 9)}`,
+} = Astro.props as Props;
+---
+
+<div class="space-y-1.5">
+  <label for={id} class="block text-sm font-medium text-text-light-gray">
+    {label}
+  </label>
+  <input
+    id={id}
+    type={type}
+    value={value}
+    placeholder={placeholder}
+    disabled={disabled}
+    class="w-full bg-background-dark border border-border-dark rounded-lg px-4 py-2.5 text-text-off-white
+             focus:ring-1 focus:ring-vibrant-blue focus:border-vibrant-blue outline-none transition-all
+             placeholder-text-light-gray/50 disabled:opacity-50 disabled:cursor-not-allowed"
+  />
+</div>

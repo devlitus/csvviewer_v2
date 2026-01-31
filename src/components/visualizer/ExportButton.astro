@@ -1,0 +1,51 @@
+---
+---
+
+<div data-export-wrapper class="relative">
+  <!-- Trigger Button -->
+  <button
+    data-export-trigger
+    class="flex items-center gap-2 bg-vibrant-blue hover:bg-primary-hover text-white rounded-lg px-3 py-1.5 text-sm font-bold shadow-lg shadow-vibrant-blue/20 transition-colors"
+    aria-label="Export data"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >
+    <span class="material-symbols-outlined text-sm">download</span>
+    Export
+    <span class="material-symbols-outlined text-sm">expand_more</span>
+  </button>
+
+  <!-- Dropdown Panel -->
+  <div
+    data-export-dropdown
+    class="hidden absolute right-0 top-full mt-2 z-20 w-56 bg-surface-card border border-border-dark rounded-lg shadow-lg"
+  >
+    <!-- Export All Option -->
+    <button
+      data-export-all
+      class="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors border-b border-border-dark last:border-b-0"
+    >
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">download</span>
+        <div>
+          <p class="text-sm text-text-off-white">Export All Data</p>
+          <p class="text-xs text-text-light-gray">All columns, all rows</p>
+        </div>
+      </div>
+    </button>
+
+    <!-- Export Visible Columns Option -->
+    <button
+      data-export-filtered
+      class="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors"
+    >
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">filter_alt</span>
+        <div>
+          <p class="text-sm text-text-off-white">Export Visible Columns</p>
+          <p class="text-xs text-text-light-gray">Only visible columns, all rows</p>
+        </div>
+      </div>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+---
+interface Props {
+  title: string;
+  icon: string;
+}
+
+const { title, icon } = Astro.props as Props;
+---
+
+<section
+  class="bg-surface-card border border-border-dark rounded-xl p-6 shadow-sm"
+>
+  <h2
+    class="text-xl font-bold text-text-off-white flex items-center gap-2 mb-6"
+  >
+    <span
+      class="material-symbols-outlined text-vibrant-blue"
+      style="font-size: 24px;"
+    >
+      {icon}
+    </span>
+    {title}
+  </h2>
+  <slot />
+</section>

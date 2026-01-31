@@ -1,0 +1,35 @@
+---
+import CSVTableHeader from "./CSVTableHeader.astro";
+import TablePagination from "./TablePagination.astro";
+
+interface Column {
+  name: string;
+  align?: "left" | "right";
+  sortIcon?: "unfold_more" | "arrow_downward" | "filter_list";
+}
+
+interface Props {
+  columns?: Column[];
+  rows?: Record<string, string | number>[];
+}
+
+const { columns = [], rows = [] } = Astro.props as Props;
+---
+
+<div
+  class="flex-1 min-h-0 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden"
+  data-csv-table-container
+>
+  <!-- Table with scroll -->
+  <div class="flex-1 overflow-auto">
+    <table class="min-w-full text-left text-sm whitespace-nowrap">
+      <CSVTableHeader {columns} />
+      <tbody class="divide-y divide-border-dark/30" data-csv-table-body>
+        <!-- Rows rendered dynamically by visualizerPage.ts -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination footer -->
+  <TablePagination currentPage={1} totalPages={24} />
+</div>

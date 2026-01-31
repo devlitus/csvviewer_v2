@@ -41,9 +41,118 @@ Planificas implementaciones de features, refactorings, control de errores y deci
    - Riesgos y consideraciones
    - Criterios de verificacion
 
-## Formato de planes
+## Estructura de Documentación en `docs/`
 
-Usa markdown estructurado. Nombra los archivos como `docs/plan-<nombre-descriptivo>.md`. Cuando describas cambios en archivos, indica la ruta y describe QUE debe cambiar conceptualmente, no COMO se escribe el codigo.
+**Patrón actual organizado por módulos:**
+
+```
+docs/
+├── README.md                          # Índice central (ya existe)
+├── upload/                            # Módulo: Carga de archivos
+│   ├── plan-ui.md
+│   └── plan-drag-drop-feature.md
+├── files/                             # Módulo: Gestión de archivos
+│   ├── plan-ui.md
+│   ├── plan-indexeddb-integration.md
+│   ├── plan-delete-feature.md
+│   └── plan-refactoring.md
+├── visualizer/                        # Módulo: Visualización CSV
+│   └── plan-ui.md
+└── validation/                        # Planes de validación
+    └── fase3-validation.md
+```
+
+### Reglas de ubicación
+
+**Determina el módulo del plan según el contexto:**
+
+1. **`docs/upload/`** — Features relacionadas con carga de archivos
+   - Drag & drop
+   - Validación inicial
+   - UI del upload zone
+   - Gestión de archivo mientras se sube
+
+2. **`docs/files/`** — Features relacionadas con gestión de archivos almacenados
+   - Tabla de archivos
+   - Paginación
+   - Eliminación (individual o masiva)
+   - Selección múltiple
+   - Refactoring de lógica de gestión
+   - Integración con IndexedDB
+
+3. **`docs/visualizer/`** — Features relacionadas con visualización de datos CSV
+   - Tabla de datos
+   - Filtros por columna
+   - Ordenamiento
+   - Exportación
+   - Diseño UI del visualizador
+
+4. **`docs/validation/`** — Checklists de validación y QA
+   - Validación de fases completas
+   - Checklists de implementación
+   - Pruebas de integración
+
+### Nomenclatura de archivos
+
+**Patrón:** `docs/<modulo>/plan-<descripcion>.md`
+
+**Ejemplos:**
+- `docs/upload/plan-ui.md` ✅
+- `docs/files/plan-delete-feature.md` ✅
+- `docs/visualizer/plan-export-excel.md` ✅
+- `docs/validation/fase2-validation.md` ✅
+
+**Nombres específicos para cada tipo:**
+- **UI:** `plan-ui.md` (el único con nombre genérico, va siempre primero)
+- **Features:** `plan-<nombre-feature>.md` (ej: `plan-drag-drop-feature.md`)
+- **Integración:** `plan-<nombre>-integration.md` (ej: `plan-indexeddb-integration.md`)
+- **Refactoring:** `plan-refactoring.md`
+- **Validación:** `fase<numero>-validation.md`
+
+### Si la carpeta del módulo no existe
+
+1. Verifica que el módulo que necesitas no está ya en una de las 5 carpetas existentes
+2. Si necesitas un módulo nuevo:
+   - **Coordina con el usuario** antes de crear una nueva carpeta
+   - Sugiere si podría ir en una carpeta existente según el patrón anterior
+   - Si el usuario confirma, crea la carpeta: `mkdir -p docs/<nuevo-modulo>`
+   - Luego crea el archivo plan
+
+### Estructura interna de un plan
+
+Todos los planes deben incluir estas secciones:
+
+```markdown
+# Plan: <Título descriptivo>
+
+## 1. Resumen
+Párrafo breve explicando qué se va a hacer y por qué.
+
+## 2. Análisis del Estado Actual
+- Qué existe actualmente
+- Qué funciona bien
+- Qué necesita mejorar
+- Archivos y componentes relevantes
+
+## 3. Solución Propuesta
+- Arquitectura general
+- Componentes/archivos a crear o modificar
+- Flujo de datos
+- Justificación de decisiones
+
+## 4. Detalles de Implementación
+(Puede variar según el tipo de plan)
+- Para UI: estructura de componentes, estilos, tokens de diseño
+- Para features: paso a paso (sin código, solo descripción)
+- Para refactoring: módulos nuevos, responsabilidades de cada uno
+- Para integración: APIs que se usan, configuración necesaria
+
+## 5. Criterios de Validación
+Cómo verificar que la implementación está correcta.
+
+## 6. Riesgos y Consideraciones
+Problemas potenciales y cómo mitigarlos.
+```
 
 ## Toma de decisiones
 
@@ -51,3 +160,4 @@ Usa markdown estructurado. Nombra los archivos como `docs/plan-<nombre-descripti
 - Evita sobre-ingenieria: propone la solucion mas simple que resuelva el problema.
 - Considera rendimiento, mantenibilidad y experiencia de desarrollo.
 - Si una libreria del stack ya resuelve el problema, no propongas agregar otra.
+- **Verifica siempre `docs/README.md`** antes de crear un nuevo plan para no duplicar documentación existente.

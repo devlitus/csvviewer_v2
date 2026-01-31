@@ -1,0 +1,45 @@
+---
+interface Theme {
+  id: string;
+  icon: string;
+  label: string;
+  active: boolean;
+}
+
+const themes: Theme[] = [
+  { id: "dark", icon: "dark_mode", label: "Dark Mode", active: true },
+  { id: "light", icon: "light_mode", label: "Light Mode", active: false },
+  { id: "system", icon: "brightness_auto", label: "System", active: false },
+];
+---
+
+<div class="space-y-1.5">
+  <label class="block text-sm font-medium text-text-light-gray">
+    Interface Theme
+  </label>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    {
+      themes.map((theme) => (
+        <button
+          class:list={[
+            "relative border-2 rounded-lg p-3 flex items-center justify-center gap-2 transition-all",
+            "text-sm font-medium",
+            theme.active
+              ? "border-vibrant-blue bg-vibrant-blue/10 text-text-off-white shadow-inner"
+              : "border-border-dark bg-background-dark text-text-light-gray hover:bg-white/5",
+          ]}
+        >
+          <span class="material-symbols-outlined" style="font-size: 20px;">
+            {theme.icon}
+          </span>
+          {theme.label}
+          {theme.active && (
+            <span class="absolute -top-2 -right-2 bg-vibrant-blue text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+              ACTIVE
+            </span>
+          )}
+        </button>
+      ))
+    }
+  </div>
+</div>
