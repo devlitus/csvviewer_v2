@@ -7,6 +7,7 @@ Guía completa de planes, diseños e implementación del proyecto CSV Viewer.
 ## 📂 Estructura de Documentación
 
 ### 📤 [Módulo Upload](./upload/)
+
 Funcionalidad de carga de archivos CSV con interfaz visual y drag & drop.
 
 | Documento | Descripción |
@@ -17,6 +18,7 @@ Funcionalidad de carga de archivos CSV con interfaz visual y drag & drop.
 ---
 
 ### 📁 [Módulo Files](./files/)
+
 Gestión de archivos CSV con tabla, paginación y eliminación.
 
 | Documento | Descripción |
@@ -29,6 +31,7 @@ Gestión de archivos CSV con tabla, paginación y eliminación.
 ---
 
 ### 📊 [Módulo Visualizer](./visualizer/)
+
 Visualización interactiva de datos CSV con tabla, filtros y exportación.
 
 | Documento | Descripción |
@@ -38,6 +41,7 @@ Visualización interactiva de datos CSV con tabla, filtros y exportación.
 ---
 
 ### ✅ [Validación](./validation/)
+
 Pruebas y checklists de implementación.
 
 | Documento | Descripción |
@@ -73,18 +77,21 @@ Pruebas y checklists de implementación.
 ## 📋 Contenido Rápido por Módulo
 
 ### Upload
+
 - **Objetivo**: Permitir usuarios subir CSV con drag & drop
 - **Componentes**: UploadZone, RecentFilesSection, RecentFileCard
 - **Tecnologías**: File API, IndexedDB, parseCSVString()
 - **Estado**: ✅ Completado
 
 ### Files
+
 - **Objetivo**: Administrar archivos CSV con tabla, paginación y eliminación
 - **Componentes**: FileTable, FileTableRow, Pagination, StatusBadge, SelectionBar
 - **Tecnologías**: IndexedDB, Event Management, Modal confirmation
 - **Estado**: ✅ Completado
 
 ### Visualizer
+
 - **Objetivo**: Visualizar datos CSV con filtros, ordenamiento y exportación
 - **Componentes**: CSVTable, CSVTableHeader, DataToolbar, ExportButton, CategoryBadge
 - **Tecnologías**: Astro transitions, Tailwind styling, IndexedDB integration

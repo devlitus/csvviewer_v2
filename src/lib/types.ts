@@ -47,3 +47,11 @@ export interface RowRenderContext {
   isSelected: boolean;
   isPendingDelete: boolean;
 }
+
+/**
+ * Settings form option for dropdowns and selectors
+ */
+export interface SelectOption {
+  value: string;
+  text: string;
+}

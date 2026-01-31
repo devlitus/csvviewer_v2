@@ -1,0 +1,13 @@
+<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+  <!-- Background -->
+  <rect width="96" height="96" fill="#24272B" rx="50"/>
+  
+  <!-- User icon circle background -->
+  <circle cx="48" cy="48" r="48" fill="#1A1C1E"/>
+  
+  <!-- Head -->
+  <circle cx="48" cy="32" r="14" fill="#3B82F6" opacity="0.8"/>
+  
+  <!-- Body -->
+  <path d="M 30 50 Q 30 46 48 46 Q 66 46 66 50 L 66 70 Q 66 74 62 74 L 34 74 Q 30 74 30 70 Z" fill="#3B82F6" opacity="0.8"/>
+</svg>
