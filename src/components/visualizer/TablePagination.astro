@@ -47,6 +47,9 @@ const { currentPage = 1, totalPages = 24 } = Astro.props as Props;
 
     <span
       class="px-3 py-1 text-xs text-text-light-gray min-w-20 text-center"
+      role="status"
+      aria-live="polite"
+      aria-label="Current page information"
     >
       Page <span data-current-page>{currentPage}</span> of <span
         data-total-pages>{totalPages}</span

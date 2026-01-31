@@ -17,12 +17,12 @@ const { columns = [], rows = [] } = Astro.props as Props;
 ---
 
 <div
-  class="flex-1 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden"
+  class="flex-1 min-h-0 bg-background-dark border border-border-dark rounded-xl flex flex-col shadow-inner overflow-hidden"
   data-csv-table-container
 >
   <!-- Table with scroll -->
   <div class="flex-1 overflow-auto">
-    <table class="w-full text-left text-sm whitespace-nowrap">
+    <table class="min-w-full text-left text-sm whitespace-nowrap">
       <CSVTableHeader {columns} />
       <tbody class="divide-y divide-border-dark/30" data-csv-table-body>
         <!-- Rows rendered dynamically by visualizerPage.ts -->

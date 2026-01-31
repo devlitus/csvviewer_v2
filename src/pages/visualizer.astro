@@ -42,10 +42,10 @@ import CSVTable from "../components/visualizer/CSVTable.astro";
   <div data-visualizer-content style="display: contents;">
     <VisualizerHeader />
     <DataToolbar />
-    <div class="flex-1 px-8 pb-8 overflow-hidden">
+    <div class="flex flex-col flex-1 px-8 pb-8 min-h-0">
       <CSVTable />
     </div>
   </div>
 </AppLayout>
 
-<script src="../scripts/visualizerPage.ts"></script>
+<script src="../scripts/visualizerPage/index.ts"></script>
