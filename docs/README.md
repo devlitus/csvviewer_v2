@@ -87,8 +87,8 @@ Pruebas y checklists de implementación.
 ### Visualizer
 - **Objetivo**: Visualizar datos CSV con filtros, ordenamiento y exportación
 - **Componentes**: CSVTable, CSVTableHeader, DataToolbar, ExportButton, CategoryBadge
-- **Tecnologías**: Astro transitions, Tailwind styling
-- **Estado**: 🔄 En progreso
+- **Tecnologías**: Astro transitions, Tailwind styling, IndexedDB integration
+- **Estado**: ✅ Completado
 
 ---
 
