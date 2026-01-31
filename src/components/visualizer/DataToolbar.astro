@@ -1,6 +1,5 @@
 ---
 import ColumnFilterInput from "./ColumnFilterInput.astro";
-import ColumnVisibilityDropdown from "./ColumnVisibilityDropdown.astro";
 import FilterButton from "./FilterButton.astro";
 import ExportButton from "./ExportButton.astro";
 
@@ -33,7 +32,6 @@ const { showingRows = 50, totalRecords = 12403 } = Astro.props as Props;
     class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0"
   >
     <ColumnFilterInput />
-    <ColumnVisibilityDropdown />
     <FilterButton />
     <ExportButton />
   </div>
