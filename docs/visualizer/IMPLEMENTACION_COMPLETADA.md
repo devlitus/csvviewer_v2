@@ -247,7 +247,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
 
 1. **Ordenamiento** - Hacer headers clickeable para sortear
 2. **Filtros** - Implementar `ColumnFilterInput` y `FilterButton`
-3. **Exportación** - Funcionalidad real en `ExportButton` (CSV/Excel)
+3. ~~**Exportación**~~ - ✅ **COMPLETADA** (ver `EXPORTACION_COMPLETADA.md`)
 4. **Búsqueda** - Búsqueda global en datos
 5. **Virtualización** - Para archivos muy grandes (1000+ rows)
 6. **Detección de tipos** - Formateo inteligente de datos
