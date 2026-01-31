@@ -6,7 +6,7 @@ model: Claude Haiku 4.5 (copilot)
 handoffs:
   - label: Revisar Código
     agent: Code Reviewer
-    prompt: Revisa el código implementado arriba.
+    prompt: Revisa el código implementado arriba por Implementer.
     send: true
 ---
 

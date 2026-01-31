@@ -6,7 +6,7 @@ model: Claude Sonnet 4
 handoffs:
   - label: Corregir Problemas
     agent: Implementer
-    prompt: Corrige los problemas reportados arriba.
+    prompt: Corrige los problemas reportados por Code Reviewer.
     send: true
 ---
 
@@ -44,6 +44,9 @@ Responde siempre en español.
 * **Rendimiento**: Iteraciones innecesarias, imports pesados, operaciones bloqueantes.
 * **Consistencia**: Patrones y convenciones del proyecto, nombrado consistente.
 * **Build y tests**: Que `pnpm build` pase sin errores.
+* **Requisitos del plan**: Que todo lo planeado esté implementado correctamente.
+* **Buenas prácticas**: Uso adecuado de TypeScript, manejo de errores, comentarios útiles.
+* **Comentarios**: Que expliquen el "por qué", no el "qué" y lops que no aporen valor pedir que se eliminen.
 
 ## Formato del reporte
 
