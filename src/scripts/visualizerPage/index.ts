@@ -35,9 +35,10 @@ import {
   PaginationEventManager,
   RowsPerPageEventManager,
   ColumnVisibilityEventManager,
+  ExportEventManager,
 } from "./events";
 import { UIStateManager } from "./ui";
-import { loadAndParseFile } from "./utils/dataLoader";
+import { loadAndParseFile, exportToCSV } from "./utils";
 import { CONFIG } from "./config";
 import { onPageLoad, onBeforeSwap } from "../../lib/pageInit";
 
@@ -56,6 +57,7 @@ let columnVisibilityRenderer: ColumnVisibilityRenderer;
 let paginationEvents: PaginationEventManager;
 let rowsPerPageEvents: RowsPerPageEventManager;
 let columnVisibilityEvents: ColumnVisibilityEventManager;
+let exportEvents: ExportEventManager;
 let uiState: UIStateManager;
 
 /**
@@ -83,6 +85,7 @@ async function initVisualizerPage(): Promise<void> {
     paginationEvents = new PaginationEventManager();
     rowsPerPageEvents = new RowsPerPageEventManager();
     columnVisibilityEvents = new ColumnVisibilityEventManager();
+    exportEvents = new ExportEventManager();
     uiState = new UIStateManager();
 
     // Show loading state
@@ -279,6 +282,90 @@ function setupEvents(): void {
       trigger.setAttribute("aria-expanded", "false");
     }
   });
+
+  // Export events
+  exportEvents.onTriggerClick(() => {
+    const dropdown = document.querySelector(
+      "[data-export-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-export-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger) {
+      dropdown.classList.toggle("hidden");
+      trigger.setAttribute(
+        "aria-expanded",
+        dropdown.classList.contains("hidden") ? "false" : "true"
+      );
+    }
+  });
+
+  exportEvents.onExportAll(() => {
+    const filename = dataStore.getFilename().replace(/\.csv$/, "");
+    exportToCSV(dataStore.getColumns(), dataStore.getRows(), filename);
+
+    // Close dropdown
+    const dropdown = document.querySelector(
+      "[data-export-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-export-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger) {
+      dropdown.classList.add("hidden");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  exportEvents.onExportFiltered(() => {
+    const filename = dataStore
+      .getFilename()
+      .replace(/\.csv$/, "")
+      .concat("_filtered");
+    exportToCSV(
+      columnVisibilityManager.getVisibleColumns(),
+      dataStore.getRows(),
+      filename
+    );
+
+    // Close dropdown
+    const dropdown = document.querySelector(
+      "[data-export-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-export-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger) {
+      dropdown.classList.add("hidden");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  exportEvents.onClickOutside(() => {
+    const dropdown = document.querySelector(
+      "[data-export-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-export-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger && !dropdown.classList.contains("hidden")) {
+      dropdown.classList.add("hidden");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  exportEvents.onEscapeKey(() => {
+    const dropdown = document.querySelector(
+      "[data-export-dropdown]"
+    ) as HTMLElement | null;
+    const trigger = document.querySelector(
+      "[data-export-trigger]"
+    ) as HTMLButtonElement | null;
+    if (dropdown && trigger && !dropdown.classList.contains("hidden")) {
+      dropdown.classList.add("hidden");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  });
 }
 
 /**
@@ -314,6 +401,7 @@ function cleanup(): void {
   paginationEvents?.cleanup();
   rowsPerPageEvents?.cleanup();
   columnVisibilityEvents?.cleanup();
+  exportEvents?.cleanup();
 
   // Reset stores
   dataStore?.clear();

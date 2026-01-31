@@ -38,3 +38,10 @@ export const COLUMN_VISIBILITY_LIST = "[data-column-visibility-list]";
 export const COLUMN_VISIBILITY_COUNT = "[data-column-visibility-count]";
 export const COLUMN_SELECT_ALL = "[data-column-select-all]";
 export const COLUMN_DESELECT_ALL = "[data-column-deselect-all]";
+
+// Export
+export const EXPORT_WRAPPER = "[data-export-wrapper]";
+export const EXPORT_TRIGGER = "[data-export-trigger]";
+export const EXPORT_DROPDOWN = "[data-export-dropdown]";
+export const EXPORT_ALL = "[data-export-all]";
+export const EXPORT_FILTERED = "[data-export-filtered]";
